@@ -727,11 +727,20 @@ async function onLogout() {
 
 .finance-bottom-nav .q-tabs {
   height: 60px;
+  width: 100%;
 }
 
-.finance-bottom-nav .q-tab {
+/* Spread tabs evenly across full footer width */
+.finance-bottom-nav :deep(.q-tabs__content) {
+  width: 100%;
+  justify-content: space-around;
+}
+
+.finance-bottom-nav :deep(.q-tab) {
   padding: 4px 0;
   min-height: 60px;
+  flex: 1 1 0;
+  max-width: none;
 }
 
 .finance-bottom-nav .q-tab__label {
