@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
 import { Dark, date } from 'quasar'
-import i18n from 'src/i18n'
+import i18n from '/src/i18n'
 
 // Hash a PIN string using SHA-256 via the Web Crypto API.
 // Returns a lowercase hex string (64 chars).

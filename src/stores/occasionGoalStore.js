@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import { collection, doc, onSnapshot, addDoc, updateDoc, deleteDoc } from 'firebase/firestore'
-import { firestore, auth } from 'boot/firebase'
+import { firestore, auth } from '/src/boot/firebase'
 
 export const useOccasionGoalStore = defineStore('occasionGoals', () => {
   const goals = ref([])
@@ -15,9 +15,7 @@ export const useOccasionGoalStore = defineStore('occasionGoals', () => {
   )
 
   const completedGoals = computed(() =>
-    goals.value
-      .filter((g) => g.completed)
-      .sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0)),
+    goals.value.filter((g) => g.completed).sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0)),
   )
 
   const totalMonthlyNeeded = computed(() => {

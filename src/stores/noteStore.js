@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
 import { collection, doc, onSnapshot, addDoc, updateDoc, deleteDoc } from 'firebase/firestore'
-import { firestore, auth } from 'boot/firebase'
+import { firestore, auth } from '/src/boot/firebase'
 
 export const useNoteStore = defineStore('notes', () => {
   const notes = ref([])

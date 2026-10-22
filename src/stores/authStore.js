@@ -10,7 +10,7 @@ import {
   EmailAuthProvider,
 } from 'firebase/auth'
 import { doc, getDoc, setDoc, updateDoc, collection, addDoc } from 'firebase/firestore'
-import { auth, firestore } from 'boot/firebase'
+import { auth, firestore } from '/src/boot/firebase'
 
 // Map Firebase auth error codes to user-friendly messages, preventing
 // implementation details (e.g. "auth/user-not-found") from reaching the UI.

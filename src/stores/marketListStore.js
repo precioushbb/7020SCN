@@ -9,7 +9,7 @@ import {
   deleteDoc,
   deleteField,
 } from 'firebase/firestore'
-import { firestore, auth } from 'boot/firebase'
+import { firestore, auth } from '/src/boot/firebase'
 
 export const useMarketListStore = defineStore('marketLists', () => {
   const lists = ref([])

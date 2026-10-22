@@ -1,2 +1,13 @@
+allowBuilds:
+  '@firebase/util': set this to true or false
+  '@parcel/watcher': set this to true or false
+  esbuild: set this to true or false
+  protobufjs: set this to true or false
+  sharp: set this to true or false
+minimumReleaseAgeExclude:
+  - '@vitest/mocker@5.0.5'
+  - '@vitest/spy@5.0.5'
+  - vitest@5.0.5
+  - '@vitest/coverage-v8@5.0.5'
 # https://pnpm.io/settings
 shamefullyHoist: true
