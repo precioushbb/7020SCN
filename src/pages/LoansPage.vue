@@ -6,37 +6,44 @@
         <div class="page-title">{{ $t('loans.title') }}</div>
         <div class="page-subtitle">{{ loanStore.loans.length }}{{ $t('loans.countSuffix') }}</div>
       </div>
-      <q-btn round flat dense icon="add_circle" size="md"
-        style="color: #16161a; background: rgba(22,22,26,0.06); border-radius: 8px;" @click="openAddDialog" />
+      <q-btn
+        round
+        flat
+        dense
+        icon="add_circle"
+        size="md"
+        style="color: #16161a; background: rgba(22, 22, 26, 0.06); border-radius: 8px"
+        @click="openAddDialog"
+      />
     </div>
 
     <!-- Summary Cards -->
     <div class="row q-col-gutter-sm q-mb-md">
       <div class="col-6 col-md-4">
-        <q-card class="finance-card" style="border-left: 4px solid var(--income-color);">
+        <q-card class="finance-card" style="border-left: 4px solid var(--income-color)">
           <q-card-section class="q-py-sm q-px-md">
             <div class="text-caption text-grey-7">{{ $t('loans.totalReceivable') }}</div>
-            <div class="text-h6 text-weight-bold" style="color: #2f7d5c;">
+            <div class="text-h6 text-weight-bold" style="color: #2f7d5c">
               {{ settings.currency }}{{ settings.formatNumber(loanStore.totalReceivable) }}
             </div>
           </q-card-section>
         </q-card>
       </div>
       <div class="col-6 col-md-4">
-        <q-card class="finance-card" style="border-left: 4px solid #ef4444;">
+        <q-card class="finance-card" style="border-left: 4px solid #ef4444">
           <q-card-section class="q-py-sm q-px-md">
             <div class="text-caption text-grey-7">{{ $t('loans.totalPayable') }}</div>
-            <div class="text-h6 text-weight-bold" style="color: #b14437;">
+            <div class="text-h6 text-weight-bold" style="color: #b14437">
               {{ settings.currency }}{{ settings.formatNumber(loanStore.totalPayable) }}
             </div>
           </q-card-section>
         </q-card>
       </div>
       <div v-if="loanStore.loanEntries.length" class="col-12 col-md-4">
-        <q-card class="finance-card" style="border-left: 4px solid #f59e0b;">
+        <q-card class="finance-card" style="border-left: 4px solid #f59e0b">
           <q-card-section class="q-py-sm q-px-md">
             <div class="text-caption text-grey-7">{{ $t('loans.totalLoan') }}</div>
-            <div class="text-h6 text-weight-bold" style="color: #f59e0b;">
+            <div class="text-h6 text-weight-bold" style="color: #f59e0b">
               {{ settings.currency }}{{ settings.formatNumber(loanStore.totalLoanAmount) }}
             </div>
           </q-card-section>
@@ -52,8 +59,15 @@
     <template v-else>
       <!-- Tabs -->
       <q-card class="finance-card tab-card q-mb-md">
-        <q-tabs v-model="activeTab" dense active-color="dark" indicator-color="dark" class="text-grey-6"
-          align="justify" no-caps>
+        <q-tabs
+          v-model="activeTab"
+          dense
+          active-color="dark"
+          indicator-color="dark"
+          class="text-grey-6"
+          align="justify"
+          no-caps
+        >
           <q-tab name="receivable" :label="$t('loans.receivable')" />
           <q-tab name="payable" :label="$t('loans.payable')" />
           <q-tab name="loan" :label="$t('loans.loan')" />
@@ -61,21 +75,32 @@
       </q-card>
 
       <!-- Receivable Tab -->
-      <q-tab-panels v-model="activeTab" animated style="background: transparent;">
+      <q-tab-panels v-model="activeTab" animated style="background: transparent">
         <q-tab-panel name="receivable" class="q-pa-none">
           <div v-if="activeLoans(loanStore.receivables).length" class="q-mb-md">
             <div class="page-section-title">{{ $t('loans.activeLoans') }}</div>
             <div class="row q-col-gutter-sm">
-              <div v-for="loan in activeLoans(loanStore.receivables)" :key="loan.id" class="col-12 col-md-4">
-                <q-slide-item @left="(obj) => onSwipe(obj, 'edit', loan)" @right="(obj) => onSwipe(obj, 'delete', loan)">
+              <div
+                v-for="loan in activeLoans(loanStore.receivables)"
+                :key="loan.id"
+                class="col-12 col-md-4"
+              >
+                <q-slide-item
+                  @left="(obj) => onSwipe(obj, 'edit', loan)"
+                  @right="(obj) => onSwipe(obj, 'delete', loan)"
+                >
                   <template v-slot:left>
                     <q-icon name="edit" color="dark" />
                   </template>
                   <template v-slot:right>
                     <q-icon name="delete" color="negative" />
                   </template>
-                  <loan-card :loan="loan" color="#2f7d5c" @click="openDetail(loan)"
-                    @pay="openPaymentDialog(loan)" />
+                  <loan-card
+                    :loan="loan"
+                    color="#2f7d5c"
+                    @click="openDetail(loan)"
+                    @pay="openPaymentDialog(loan)"
+                  />
                 </q-slide-item>
               </div>
             </div>
@@ -84,8 +109,15 @@
           <div v-if="settledLoans(loanStore.receivables).length" class="q-mb-md">
             <div class="page-section-title">{{ $t('loans.settledLoans') }}</div>
             <div class="row q-col-gutter-sm">
-              <div v-for="loan in settledLoans(loanStore.receivables)" :key="loan.id" class="col-12 col-md-4">
-                <q-slide-item @left="(obj) => onSwipe(obj, 'edit', loan)" @right="(obj) => onSwipe(obj, 'delete', loan)">
+              <div
+                v-for="loan in settledLoans(loanStore.receivables)"
+                :key="loan.id"
+                class="col-12 col-md-4"
+              >
+                <q-slide-item
+                  @left="(obj) => onSwipe(obj, 'edit', loan)"
+                  @right="(obj) => onSwipe(obj, 'delete', loan)"
+                >
                   <template v-slot:left>
                     <q-icon name="edit" color="dark" />
                   </template>
@@ -109,16 +141,27 @@
           <div v-if="activeLoans(loanStore.payables).length" class="q-mb-md">
             <div class="page-section-title">{{ $t('loans.activeLoans') }}</div>
             <div class="row q-col-gutter-sm">
-              <div v-for="loan in activeLoans(loanStore.payables)" :key="loan.id" class="col-12 col-md-4">
-                <q-slide-item @left="(obj) => onSwipe(obj, 'edit', loan)" @right="(obj) => onSwipe(obj, 'delete', loan)">
+              <div
+                v-for="loan in activeLoans(loanStore.payables)"
+                :key="loan.id"
+                class="col-12 col-md-4"
+              >
+                <q-slide-item
+                  @left="(obj) => onSwipe(obj, 'edit', loan)"
+                  @right="(obj) => onSwipe(obj, 'delete', loan)"
+                >
                   <template v-slot:left>
                     <q-icon name="edit" color="dark" />
                   </template>
                   <template v-slot:right>
                     <q-icon name="delete" color="negative" />
                   </template>
-                  <loan-card :loan="loan" color="#b14437" @click="openDetail(loan)"
-                    @pay="openPaymentDialog(loan)" />
+                  <loan-card
+                    :loan="loan"
+                    color="#b14437"
+                    @click="openDetail(loan)"
+                    @pay="openPaymentDialog(loan)"
+                  />
                 </q-slide-item>
               </div>
             </div>
@@ -127,8 +170,15 @@
           <div v-if="settledLoans(loanStore.payables).length" class="q-mb-md">
             <div class="page-section-title">{{ $t('loans.settledLoans') }}</div>
             <div class="row q-col-gutter-sm">
-              <div v-for="loan in settledLoans(loanStore.payables)" :key="loan.id" class="col-12 col-md-4">
-                <q-slide-item @left="(obj) => onSwipe(obj, 'edit', loan)" @right="(obj) => onSwipe(obj, 'delete', loan)">
+              <div
+                v-for="loan in settledLoans(loanStore.payables)"
+                :key="loan.id"
+                class="col-12 col-md-4"
+              >
+                <q-slide-item
+                  @left="(obj) => onSwipe(obj, 'edit', loan)"
+                  @right="(obj) => onSwipe(obj, 'delete', loan)"
+                >
                   <template v-slot:left>
                     <q-icon name="edit" color="dark" />
                   </template>
@@ -152,42 +202,70 @@
           <!-- Monthly Repayment Schedule -->
           <div v-if="loanStore.upcomingMonthlySchedule.length" class="q-mb-md">
             <div class="page-section-title">{{ $t('loans.upcomingSchedule') }}</div>
-            <q-card class="finance-card" style="overflow: hidden;">
+            <q-card class="finance-card" style="overflow: hidden">
               <q-list separator dense>
-                <q-item v-for="item in loanStore.upcomingMonthlySchedule" :key="item.month"
-                  :style="isCurrentMonth(item.month) ? 'background: #fff8ec;' : ''">
+                <q-item
+                  v-for="item in loanStore.upcomingMonthlySchedule"
+                  :key="item.month"
+                  :style="isCurrentMonth(item.month) ? 'background: #fff8ec;' : ''"
+                >
                   <q-item-section avatar>
-                    <q-avatar size="38px"
-                      :style="{ background: isCurrentMonth(item.month) ? '#f59e0b22' : 'var(--card-cream)' }">
-                      <q-icon name="calendar_month" size="18px"
-                        :style="{ color: isCurrentMonth(item.month) ? '#f59e0b' : '#888' }" />
+                    <q-avatar
+                      size="38px"
+                      :style="{
+                        background: isCurrentMonth(item.month) ? '#f59e0b22' : 'var(--card-cream)',
+                      }"
+                    >
+                      <q-icon
+                        name="calendar_month"
+                        size="18px"
+                        :style="{ color: isCurrentMonth(item.month) ? '#f59e0b' : '#888' }"
+                      />
                     </q-avatar>
                   </q-item-section>
                   <q-item-section>
-                    <q-item-label class="text-weight-medium" style="font-size: 0.9rem;">
+                    <q-item-label class="text-weight-medium" style="font-size: 0.9rem">
                       {{ formatMonth(item.month) }}
-                      <q-badge v-if="isCurrentMonth(item.month)" color="amber-7" text-color="white"
-                        :label="$t('loans.thisMonthBadge')" class="q-ml-xs" style="font-size: 10px;" />
+                      <q-badge
+                        v-if="isCurrentMonth(item.month)"
+                        color="amber-7"
+                        text-color="white"
+                        :label="$t('loans.thisMonthBadge')"
+                        class="q-ml-xs"
+                        style="font-size: 10px"
+                      />
                     </q-item-label>
-                    <q-item-label caption>{{ $t('loans.installmentsDue', { count: item.count }) }}</q-item-label>
+                    <q-item-label caption>{{
+                      $t('loans.installmentsDue', { count: item.count })
+                    }}</q-item-label>
                   </q-item-section>
                   <q-item-section side>
-                    <div class="text-weight-bold"
-                      :style="{ color: isCurrentMonth(item.month) ? '#f59e0b' : 'var(--text-primary)', fontSize: '0.95rem' }">
+                    <div
+                      class="text-weight-bold"
+                      :style="{
+                        color: isCurrentMonth(item.month) ? '#f59e0b' : 'var(--text-primary)',
+                        fontSize: '0.95rem',
+                      }"
+                    >
                       {{ settings.currency }}{{ settings.formatNumber(item.total) }}
                     </div>
                   </q-item-section>
                 </q-item>
                 <!-- Total row -->
-                <q-item style="background: var(--card-cream);">
+                <q-item style="background: var(--card-cream)">
                   <q-item-section>
-                    <q-item-label class="text-weight-bold" style="font-size: 0.9rem;">
+                    <q-item-label class="text-weight-bold" style="font-size: 0.9rem">
                       {{ $t('loans.scheduleTotal') }}
                     </q-item-label>
                   </q-item-section>
                   <q-item-section side>
-                    <div class="text-weight-bold" style="color: #f59e0b; font-size: 0.95rem;">
-                      {{ settings.currency }}{{ settings.formatNumber(loanStore.upcomingMonthlySchedule.reduce((s, i) => s + i.total, 0)) }}
+                    <div class="text-weight-bold" style="color: #f59e0b; font-size: 0.95rem">
+                      {{ settings.currency
+                      }}{{
+                        settings.formatNumber(
+                          loanStore.upcomingMonthlySchedule.reduce((s, i) => s + i.total, 0),
+                        )
+                      }}
                     </div>
                   </q-item-section>
                 </q-item>
@@ -198,16 +276,27 @@
           <div v-if="activeLoans(loanStore.loanEntries).length" class="q-mb-md">
             <div class="page-section-title">{{ $t('loans.activeLoans') }}</div>
             <div class="row q-col-gutter-sm">
-              <div v-for="loan in activeLoans(loanStore.loanEntries)" :key="loan.id" class="col-12 col-md-4">
-                <q-slide-item @left="(obj) => onSwipe(obj, 'edit', loan)" @right="(obj) => onSwipe(obj, 'delete', loan)">
+              <div
+                v-for="loan in activeLoans(loanStore.loanEntries)"
+                :key="loan.id"
+                class="col-12 col-md-4"
+              >
+                <q-slide-item
+                  @left="(obj) => onSwipe(obj, 'edit', loan)"
+                  @right="(obj) => onSwipe(obj, 'delete', loan)"
+                >
                   <template v-slot:left>
                     <q-icon name="edit" color="dark" />
                   </template>
                   <template v-slot:right>
                     <q-icon name="delete" color="negative" />
                   </template>
-                  <loan-card :loan="loan" color="#f59e0b" @click="openDetail(loan)"
-                    @pay="openDetail(loan)" />
+                  <loan-card
+                    :loan="loan"
+                    color="#f59e0b"
+                    @click="openDetail(loan)"
+                    @pay="openDetail(loan)"
+                  />
                 </q-slide-item>
               </div>
             </div>
@@ -216,8 +305,15 @@
           <div v-if="settledLoans(loanStore.loanEntries).length" class="q-mb-md">
             <div class="page-section-title">{{ $t('loans.settledLoans') }}</div>
             <div class="row q-col-gutter-sm">
-              <div v-for="loan in settledLoans(loanStore.loanEntries)" :key="loan.id" class="col-12 col-md-4">
-                <q-slide-item @left="(obj) => onSwipe(obj, 'edit', loan)" @right="(obj) => onSwipe(obj, 'delete', loan)">
+              <div
+                v-for="loan in settledLoans(loanStore.loanEntries)"
+                :key="loan.id"
+                class="col-12 col-md-4"
+              >
+                <q-slide-item
+                  @left="(obj) => onSwipe(obj, 'edit', loan)"
+                  @right="(obj) => onSwipe(obj, 'delete', loan)"
+                >
                   <template v-slot:left>
                     <q-icon name="edit" color="dark" />
                   </template>
@@ -239,7 +335,11 @@
       </q-tab-panels>
 
       <!-- Swipe Hint -->
-      <div v-if="loanStore.loans.length" class="text-center q-pa-md text-grey-6 q-mt-sm" style="font-size: 12px;">
+      <div
+        v-if="loanStore.loans.length"
+        class="text-center q-pa-md text-grey-6 q-mt-sm"
+        style="font-size: 12px"
+      >
         <q-icon name="swipe" size="16px" class="q-mr-xs" />
         {{ $t('categories.swipeHint') }}
       </div>
@@ -247,17 +347,36 @@
 
     <!-- Add Loan Dialog -->
     <q-dialog v-model="showAddDialog">
-      <q-card style="border-radius: 10px; width: 100%; max-width: 500px; background: white;">
+      <q-card style="border-radius: 10px; width: 100%; max-width: 500px; background: white">
         <q-card-section class="row items-center justify-between no-wrap q-pb-none">
-          <div class="text-h6 text-weight-bold q-pl-sm" style="color: var(--text-primary);">
-            {{ addForm.type === 'receivable' ? $t('loans.newReceivable') : addForm.type === 'payable' ? $t('loans.newPayable') : $t('loans.newLoanEntry') }}
+          <div class="text-h6 text-weight-bold q-pl-sm" style="color: var(--text-primary)">
+            {{
+              addForm.type === 'receivable'
+                ? $t('loans.newReceivable')
+                : addForm.type === 'payable'
+                  ? $t('loans.newPayable')
+                  : $t('loans.newLoanEntry')
+            }}
           </div>
-          <q-btn icon="close" flat round dense v-close-popup style="background: var(--card-cream); color: var(--text-muted);" />
+          <q-btn
+            icon="close"
+            flat
+            round
+            dense
+            v-close-popup
+            style="background: var(--card-cream); color: var(--text-muted)"
+          />
         </q-card-section>
         <q-card-section>
           <!-- Type Tabs -->
-          <q-tabs v-model="addForm.type" dense active-color="dark" indicator-color="dark" class="q-mb-md"
-            narrow-indicator>
+          <q-tabs
+            v-model="addForm.type"
+            dense
+            active-color="dark"
+            indicator-color="dark"
+            class="q-mb-md"
+            narrow-indicator
+          >
             <q-tab name="receivable" :label="$t('loans.receivable')" />
             <q-tab name="payable" :label="$t('loans.payable')" />
             <q-tab name="loan" :label="$t('loans.loan')" />
@@ -265,22 +384,54 @@
 
           <q-form @submit.prevent="addForm.type === 'loan' ? saveLoanEntry() : saveLoan()">
             <!-- Person Name -->
-            <q-input v-model="addForm.personName" :label="$t('loans.personName')" outlined dense color="dark"
-              :rules="[(val) => (val && val.length > 0) || $t('common.nameRequired')]" style="margin-bottom: 10px;" />
+            <q-input
+              v-model="addForm.personName"
+              :label="$t('loans.personName')"
+              outlined
+              dense
+              color="dark"
+              :rules="[(val) => (val && val.length > 0) || $t('common.nameRequired')]"
+              style="margin-bottom: 10px"
+            />
 
             <!-- Amount -->
-            <q-input v-model.number="addForm.amount" :label="addForm.type === 'loan' ? $t('loans.principal') : $t('common.amount')" type="number" outlined dense
-              color="dark" :prefix="settings.currency"
-              :rules="[val => val > 0 || $t('common.validAmount')]" style="margin-bottom: 10px;" />
+            <q-input
+              v-model.number="addForm.amount"
+              :label="addForm.type === 'loan' ? $t('loans.principal') : $t('common.amount')"
+              type="number"
+              outlined
+              dense
+              color="dark"
+              :prefix="settings.currency"
+              :rules="[(val) => val > 0 || $t('common.validAmount')]"
+              style="margin-bottom: 10px"
+            />
 
             <!-- Interest Rate (loan only) -->
-            <q-input v-if="addForm.type === 'loan'" v-model.number="addForm.interestRate"
-              :label="$t('loans.interestRate')" type="number" outlined dense color="dark" suffix="%"
-              :rules="[val => val >= 0 || $t('loans.validRate')]" style="margin-bottom: 10px;" />
+            <q-input
+              v-if="addForm.type === 'loan'"
+              v-model.number="addForm.interestRate"
+              :label="$t('loans.interestRate')"
+              type="number"
+              outlined
+              dense
+              color="dark"
+              suffix="%"
+              :rules="[(val) => val >= 0 || $t('loans.validRate')]"
+              style="margin-bottom: 10px"
+            />
 
             <!-- Date -->
-            <q-input v-model="addForm.date" :label="$t('common.date')" outlined dense color="dark" readonly
-              :rules="[val => !!val || $t('common.dateRequired')]" style="margin-bottom: 10px;">
+            <q-input
+              v-model="addForm.date"
+              :label="$t('common.date')"
+              outlined
+              dense
+              color="dark"
+              readonly
+              :rules="[(val) => !!val || $t('common.dateRequired')]"
+              style="margin-bottom: 10px"
+            >
               <template v-slot:append>
                 <q-icon name="event" class="cursor-pointer">
                   <q-popup-proxy cover transition-show="scale" transition-hide="scale">
@@ -291,47 +442,125 @@
             </q-input>
 
             <!-- Installment Count (loan only) -->
-            <q-input v-if="addForm.type === 'loan'" v-model.number="addForm.installmentCount"
-              :label="$t('loans.installmentCount')" type="number" outlined dense color="dark"
-              :rules="[val => val > 0 || $t('loans.validInstallments')]" style="margin-bottom: 10px;" />
+            <q-input
+              v-if="addForm.type === 'loan'"
+              v-model.number="addForm.installmentCount"
+              :label="$t('loans.installmentCount')"
+              type="number"
+              outlined
+              dense
+              color="dark"
+              :rules="[(val) => val > 0 || $t('loans.validInstallments')]"
+              style="margin-bottom: 10px"
+            />
 
             <!-- Installment Frequency (loan only) -->
-            <q-select v-if="addForm.type === 'loan'" v-model="addForm.installmentFrequency"
-              :options="frequencyOptions" :label="$t('loans.installmentFrequency')" outlined dense color="dark"
-              emit-value map-options style="margin-bottom: 10px;" />
+            <q-select
+              v-if="addForm.type === 'loan'"
+              v-model="addForm.installmentFrequency"
+              :options="frequencyOptions"
+              :label="$t('loans.installmentFrequency')"
+              outlined
+              dense
+              color="dark"
+              emit-value
+              map-options
+              style="margin-bottom: 10px"
+            />
 
             <!-- Account (loan only) -->
-            <q-select v-if="addForm.type === 'loan'" v-model="addForm.accountId"
-              :options="accountOptions" :label="$t('common.account')" outlined dense color="dark"
-              emit-value map-options :rules="[val => !!val || $t('common.accountRequired')]"
-              style="margin-bottom: 10px;" />
+            <q-select
+              v-if="addForm.type === 'loan'"
+              v-model="addForm.accountId"
+              :options="accountOptions"
+              :label="$t('common.account')"
+              outlined
+              dense
+              color="dark"
+              emit-value
+              map-options
+              :rules="[(val) => !!val || $t('common.accountRequired')]"
+              style="margin-bottom: 10px"
+            />
 
             <!-- Calculated Preview (loan only) -->
-            <div v-if="addForm.type === 'loan' && addForm.amount > 0 && addForm.interestRate >= 0 && addForm.installmentCount > 0"
-              class="q-mb-md" style="background: var(--card-cream); border-radius: 8px; padding: 12px;">
+            <div
+              v-if="
+                addForm.type === 'loan' &&
+                addForm.amount > 0 &&
+                addForm.interestRate >= 0 &&
+                addForm.installmentCount > 0
+              "
+              class="q-mb-md"
+              style="background: var(--card-cream); border-radius: 8px; padding: 12px"
+            >
               <div class="text-caption text-grey-7 q-mb-xs">{{ $t('loans.loanSummary') }}</div>
               <div class="row q-col-gutter-xs">
                 <div class="col-6">
                   <div class="text-caption">{{ $t('loans.totalInterest') }}</div>
-                  <div class="text-weight-bold">{{ settings.currency }}{{ settings.formatNumber(addForm.amount * (addForm.interestRate || 0) / 100) }}</div>
+                  <div class="text-weight-bold">
+                    {{ settings.currency
+                    }}{{
+                      settings.formatNumber((addForm.amount * (addForm.interestRate || 0)) / 100)
+                    }}
+                  </div>
                 </div>
                 <div class="col-6">
                   <div class="text-caption">{{ $t('loans.totalWithInterest') }}</div>
-                  <div class="text-weight-bold">{{ settings.currency }}{{ settings.formatNumber(addForm.amount * (1 + (addForm.interestRate || 0) / 100)) }}</div>
+                  <div class="text-weight-bold">
+                    {{ settings.currency
+                    }}{{
+                      settings.formatNumber(
+                        addForm.amount * (1 + (addForm.interestRate || 0) / 100),
+                      )
+                    }}
+                  </div>
                 </div>
                 <div class="col-12 q-mt-xs">
                   <div class="text-caption">{{ $t('loans.perInstallment') }}</div>
-                  <div class="text-weight-bold text-primary">{{ settings.currency }}{{ settings.formatNumber(Math.round(addForm.amount * (1 + (addForm.interestRate || 0) / 100) / addForm.installmentCount * 100) / 100) }}</div>
+                  <div class="text-weight-bold text-primary">
+                    {{ settings.currency
+                    }}{{
+                      settings.formatNumber(
+                        Math.round(
+                          ((addForm.amount * (1 + (addForm.interestRate || 0) / 100)) /
+                            addForm.installmentCount) *
+                            100,
+                        ) / 100,
+                      )
+                    }}
+                  </div>
                 </div>
               </div>
             </div>
 
             <!-- Notes -->
-            <q-input v-model="addForm.notes" :label="$t('common.noteOptional')" outlined dense color="dark"
-              type="textarea" rows="2" style="margin-bottom: 10px;" />
+            <q-input
+              v-model="addForm.notes"
+              :label="$t('common.noteOptional')"
+              outlined
+              dense
+              color="dark"
+              type="textarea"
+              rows="2"
+              style="margin-bottom: 10px"
+            />
 
-            <q-btn type="submit" class="full-width bg-primary-gradient" text-color="white" rounded unelevated
-              :label="addForm.type === 'receivable' ? $t('loans.addReceivable') : addForm.type === 'payable' ? $t('loans.addPayable') : $t('loans.addLoanEntry')" :loading="saving" />
+            <q-btn
+              type="submit"
+              class="full-width bg-primary-gradient"
+              text-color="white"
+              rounded
+              unelevated
+              :label="
+                addForm.type === 'receivable'
+                  ? $t('loans.addReceivable')
+                  : addForm.type === 'payable'
+                    ? $t('loans.addPayable')
+                    : $t('loans.addLoanEntry')
+              "
+              :loading="saving"
+            />
           </q-form>
         </q-card-section>
       </q-card>
@@ -339,27 +568,57 @@
 
     <!-- Edit Loan Dialog -->
     <q-dialog v-model="showEditDialog">
-      <q-card style="border-radius: 10px; width: 100%; max-width: 500px; background: white;">
+      <q-card style="border-radius: 10px; width: 100%; max-width: 500px; background: white">
         <q-card-section class="row items-center justify-between no-wrap q-pb-none">
-          <div class="text-h6 text-weight-bold q-pl-sm" style="color: var(--text-primary);">
+          <div class="text-h6 text-weight-bold q-pl-sm" style="color: var(--text-primary)">
             {{ $t('loans.editLoan') }}
           </div>
-          <q-btn icon="close" flat round dense v-close-popup style="background: var(--card-cream); color: var(--text-muted);" />
+          <q-btn
+            icon="close"
+            flat
+            round
+            dense
+            v-close-popup
+            style="background: var(--card-cream); color: var(--text-muted)"
+          />
         </q-card-section>
         <q-card-section>
           <q-form @submit.prevent="updateLoan">
             <!-- Person Name -->
-            <q-input v-model="editForm.personName" :label="$t('loans.personName')" outlined dense color="dark"
-              :rules="[(val) => (val && val.length > 0) || $t('common.nameRequired')]" style="margin-bottom: 10px;" />
+            <q-input
+              v-model="editForm.personName"
+              :label="$t('loans.personName')"
+              outlined
+              dense
+              color="dark"
+              :rules="[(val) => (val && val.length > 0) || $t('common.nameRequired')]"
+              style="margin-bottom: 10px"
+            />
 
             <!-- Amount -->
-            <q-input v-model.number="editForm.amount" :label="$t('common.amount')" type="number" outlined dense
-              color="dark" :prefix="settings.currency"
-              :rules="[val => val > 0 || $t('common.validAmount')]" style="margin-bottom: 10px;" />
+            <q-input
+              v-model.number="editForm.amount"
+              :label="$t('common.amount')"
+              type="number"
+              outlined
+              dense
+              color="dark"
+              :prefix="settings.currency"
+              :rules="[(val) => val > 0 || $t('common.validAmount')]"
+              style="margin-bottom: 10px"
+            />
 
             <!-- Date -->
-            <q-input v-model="editForm.date" :label="$t('common.date')" outlined dense color="dark" readonly
-              :rules="[val => !!val || $t('common.dateRequired')]" style="margin-bottom: 10px;">
+            <q-input
+              v-model="editForm.date"
+              :label="$t('common.date')"
+              outlined
+              dense
+              color="dark"
+              readonly
+              :rules="[(val) => !!val || $t('common.dateRequired')]"
+              style="margin-bottom: 10px"
+            >
               <template v-slot:append>
                 <q-icon name="event" class="cursor-pointer">
                   <q-popup-proxy cover transition-show="scale" transition-hide="scale">
@@ -370,11 +629,26 @@
             </q-input>
 
             <!-- Notes -->
-            <q-input v-model="editForm.notes" :label="$t('common.noteOptional')" outlined dense color="dark"
-              type="textarea" rows="2" style="margin-bottom: 10px;" />
+            <q-input
+              v-model="editForm.notes"
+              :label="$t('common.noteOptional')"
+              outlined
+              dense
+              color="dark"
+              type="textarea"
+              rows="2"
+              style="margin-bottom: 10px"
+            />
 
-            <q-btn type="submit" class="full-width bg-primary-gradient" text-color="white" rounded unelevated
-              :label="$t('common.update')" :loading="editSaving" />
+            <q-btn
+              type="submit"
+              class="full-width bg-primary-gradient"
+              text-color="white"
+              rounded
+              unelevated
+              :label="$t('common.update')"
+              :loading="editSaving"
+            />
           </q-form>
         </q-card-section>
       </q-card>
@@ -382,22 +656,38 @@
 
     <!-- Payment Dialog -->
     <q-dialog v-model="showPaymentDialog">
-      <q-card style="border-radius: 10px; width: 100%; max-width: 500px; background: white;">
+      <q-card style="border-radius: 10px; width: 100%; max-width: 500px; background: white">
         <q-card-section class="row items-center justify-between no-wrap q-pb-none">
-          <div class="text-h6 text-weight-bold q-pl-sm" style="color: var(--text-primary);">
-            {{ payingLoan?.type === 'receivable' ? $t('loans.receivePayment') : $t('loans.makePayment') }}
+          <div class="text-h6 text-weight-bold q-pl-sm" style="color: var(--text-primary)">
+            {{
+              payingLoan?.type === 'receivable'
+                ? $t('loans.receivePayment')
+                : $t('loans.makePayment')
+            }}
           </div>
-          <q-btn icon="close" flat round dense v-close-popup style="background: var(--card-cream); color: var(--text-muted);" />
+          <q-btn
+            icon="close"
+            flat
+            round
+            dense
+            v-close-popup
+            style="background: var(--card-cream); color: var(--text-muted)"
+          />
         </q-card-section>
         <q-card-section>
           <!-- Loan Info -->
-          <div class="q-mb-md" style="background: var(--card-cream); border-radius: 8px; padding: 12px;">
+          <div
+            class="q-mb-md"
+            style="background: var(--card-cream); border-radius: 8px; padding: 12px"
+          >
             <div class="row items-center justify-between">
               <div>
                 <div class="text-subtitle2 text-weight-bold">{{ payingLoan?.personName }}</div>
                 <div class="text-caption text-grey-7">
-                  {{ $t('loans.remaining') }}:
-                  {{ settings.currency }}{{ settings.formatNumber((payingLoan?.amount || 0) - (payingLoan?.paidAmount || 0)) }}
+                  {{ $t('loans.remaining') }}: {{ settings.currency
+                  }}{{
+                    settings.formatNumber((payingLoan?.amount || 0) - (payingLoan?.paidAmount || 0))
+                  }}
                 </div>
               </div>
             </div>
@@ -405,19 +695,46 @@
 
           <q-form @submit.prevent="savePayment">
             <!-- Amount -->
-            <q-input v-model.number="payForm.amount" :label="$t('common.amount')" type="number" outlined dense
-              color="dark" :prefix="settings.currency"
-              :rules="[val => val > 0 || $t('common.validAmount'), val => val <= remainingAmount || $t('loans.exceedsRemaining')]"
-              style="margin-bottom: 10px;" />
+            <q-input
+              v-model.number="payForm.amount"
+              :label="$t('common.amount')"
+              type="number"
+              outlined
+              dense
+              color="dark"
+              :prefix="settings.currency"
+              :rules="[
+                (val) => val > 0 || $t('common.validAmount'),
+                (val) => val <= remainingAmount || $t('loans.exceedsRemaining'),
+              ]"
+              style="margin-bottom: 10px"
+            />
 
             <!-- Account -->
-            <q-select v-model="payForm.accountId" :options="accountOptions" :label="$t('common.account')" outlined
-              dense color="dark" emit-value map-options
-              :rules="[val => !!val || $t('common.accountRequired')]" style="margin-bottom: 10px;" />
+            <q-select
+              v-model="payForm.accountId"
+              :options="accountOptions"
+              :label="$t('common.account')"
+              outlined
+              dense
+              color="dark"
+              emit-value
+              map-options
+              :rules="[(val) => !!val || $t('common.accountRequired')]"
+              style="margin-bottom: 10px"
+            />
 
             <!-- Date -->
-            <q-input v-model="payForm.date" :label="$t('common.date')" outlined dense color="dark" readonly
-              :rules="[val => !!val || $t('common.dateRequired')]" style="margin-bottom: 10px;">
+            <q-input
+              v-model="payForm.date"
+              :label="$t('common.date')"
+              outlined
+              dense
+              color="dark"
+              readonly
+              :rules="[(val) => !!val || $t('common.dateRequired')]"
+              style="margin-bottom: 10px"
+            >
               <template v-slot:append>
                 <q-icon name="event" class="cursor-pointer">
                   <q-popup-proxy cover transition-show="scale" transition-hide="scale">
@@ -428,61 +745,141 @@
             </q-input>
 
             <!-- Notes -->
-            <q-input v-model="payForm.notes" :label="$t('common.noteOptional')" outlined dense color="dark"
-              type="textarea" rows="2" style="margin-bottom: 10px;" />
+            <q-input
+              v-model="payForm.notes"
+              :label="$t('common.noteOptional')"
+              outlined
+              dense
+              color="dark"
+              type="textarea"
+              rows="2"
+              style="margin-bottom: 10px"
+            />
 
-            <q-btn type="submit" class="full-width bg-primary-gradient" text-color="white" rounded unelevated
-              :label="payingLoan?.type === 'receivable' ? $t('loans.receiveBtn') : $t('loans.payBtn')"
-              :loading="paymentSaving" />
+            <q-btn
+              type="submit"
+              class="full-width bg-primary-gradient"
+              text-color="white"
+              rounded
+              unelevated
+              :label="
+                payingLoan?.type === 'receivable' ? $t('loans.receiveBtn') : $t('loans.payBtn')
+              "
+              :loading="paymentSaving"
+            />
           </q-form>
         </q-card-section>
       </q-card>
     </q-dialog>
 
     <!-- Loan Detail Dialog -->
-    <q-dialog v-model="showDetailDialog" maximized transition-show="slide-up" transition-hide="slide-down">
-      <q-card style="background: var(--card-cream);">
+    <q-dialog
+      v-model="showDetailDialog"
+      maximized
+      transition-show="slide-up"
+      transition-hide="slide-down"
+    >
+      <q-card style="background: var(--card-cream)">
         <!-- Detail Header -->
-        <q-toolbar class="bg-white text-dark" style="border-bottom: 1px solid var(--card-border);">
+        <q-toolbar class="bg-white text-dark" style="border-bottom: 1px solid var(--card-border)">
           <q-btn flat round dense icon="arrow_back" @click="showDetailDialog = false" />
-          <q-toolbar-title class="text-weight-bold" style="font-size: 1.1rem;">
+          <q-toolbar-title class="text-weight-bold" style="font-size: 1.1rem">
             {{ detailLoan?.personName }}
           </q-toolbar-title>
-          <q-chip :color="detailLoan?.settled ? 'positive' : 'warning'" text-color="white" dense size="sm">
+          <q-chip
+            :color="detailLoan?.settled ? 'positive' : 'warning'"
+            text-color="white"
+            dense
+            size="sm"
+          >
             {{ detailLoan?.settled ? $t('loans.settled') : $t('loans.active') }}
           </q-chip>
         </q-toolbar>
 
         <q-page-container>
-          <div style="max-width: 700px; margin: 0 auto; padding: 16px;">
+          <div style="max-width: 700px; margin: 0 auto; padding: 16px">
             <!-- Summary Card -->
-            <q-card class="finance-card q-mb-md"
-              :style="{ borderLeft: '4px solid ' + (detailLoan?.type === 'loan' ? '#f59e0b' : detailLoan?.type === 'receivable' ? '#2f7d5c' : '#b14437') }">
+            <q-card
+              class="finance-card q-mb-md"
+              :style="{
+                borderLeft:
+                  '4px solid ' +
+                  (detailLoan?.type === 'loan'
+                    ? '#f59e0b'
+                    : detailLoan?.type === 'receivable'
+                      ? '#2f7d5c'
+                      : '#b14437'),
+              }"
+            >
               <q-card-section>
                 <div class="row items-center justify-between q-mb-sm">
                   <div class="text-caption text-grey-7">
-                    {{ detailLoan?.type === 'receivable' ? $t('loans.lentTo') : detailLoan?.type === 'loan' ? $t('loans.loan') : $t('loans.borrowedFrom') }}
+                    {{
+                      detailLoan?.type === 'receivable'
+                        ? $t('loans.lentTo')
+                        : detailLoan?.type === 'loan'
+                          ? $t('loans.loan')
+                          : $t('loans.borrowedFrom')
+                    }}
                   </div>
                   <div class="text-caption text-grey-7">{{ formatDate(detailLoan?.date) }}</div>
                 </div>
                 <div class="text-h5 text-weight-bold q-mb-sm">
-                  {{ settings.currency }}{{ settings.formatNumber(detailLoan?.type === 'loan' ? (detailLoan?.totalAmount || 0) : (detailLoan?.amount || 0)) }}
+                  {{ settings.currency
+                  }}{{
+                    settings.formatNumber(
+                      detailLoan?.type === 'loan'
+                        ? detailLoan?.totalAmount || 0
+                        : detailLoan?.amount || 0,
+                    )
+                  }}
                 </div>
-                <div v-if="detailLoan?.type === 'loan'" class="text-caption text-grey-7 q-mb-xs"
-                  style="margin-top: -6px;">
-                  {{ $t('loans.principal') }}: {{ settings.currency }}{{ settings.formatNumber(detailLoan?.amount || 0) }}
-                  &middot; {{ $t('loans.interest') }}: {{ detailLoan?.interestRate }}%
-                  ({{ settings.currency }}{{ settings.formatNumber((detailLoan?.totalAmount || 0) - (detailLoan?.amount || 0)) }})
+                <div
+                  v-if="detailLoan?.type === 'loan'"
+                  class="text-caption text-grey-7 q-mb-xs"
+                  style="margin-top: -6px"
+                >
+                  {{ $t('loans.principal') }}: {{ settings.currency
+                  }}{{ settings.formatNumber(detailLoan?.amount || 0) }} &middot;
+                  {{ $t('loans.interest') }}: {{ detailLoan?.interestRate }}% ({{ settings.currency
+                  }}{{
+                    settings.formatNumber(
+                      (detailLoan?.totalAmount || 0) - (detailLoan?.amount || 0),
+                    )
+                  }})
                 </div>
-                <q-linear-progress :value="progressValue" rounded size="8px" class="q-mb-xs"
-                  :color="detailLoan?.type === 'loan' ? 'amber-8' : detailLoan?.type === 'receivable' ? 'positive' : 'negative'" track-color="grey-3" />
+                <q-linear-progress
+                  :value="progressValue"
+                  rounded
+                  size="8px"
+                  class="q-mb-xs"
+                  :color="
+                    detailLoan?.type === 'loan'
+                      ? 'amber-8'
+                      : detailLoan?.type === 'receivable'
+                        ? 'positive'
+                        : 'negative'
+                  "
+                  track-color="grey-3"
+                />
                 <div class="row items-center justify-between">
                   <div class="text-caption text-grey-7">
-                    {{ $t('loans.paid') }}: {{ settings.currency }}{{ settings.formatNumber(detailLoan?.paidAmount || 0) }}
+                    {{ $t('loans.paid') }}: {{ settings.currency
+                    }}{{ settings.formatNumber(detailLoan?.paidAmount || 0) }}
                   </div>
-                  <div class="text-caption text-weight-medium"
-                    :style="{ color: detailLoan?.type === 'loan' ? '#f59e0b' : detailLoan?.type === 'receivable' ? '#2f7d5c' : '#b14437' }">
-                    {{ $t('loans.remaining') }}: {{ settings.currency }}{{ settings.formatNumber(detailRemaining) }}
+                  <div
+                    class="text-caption text-weight-medium"
+                    :style="{
+                      color:
+                        detailLoan?.type === 'loan'
+                          ? '#f59e0b'
+                          : detailLoan?.type === 'receivable'
+                            ? '#2f7d5c'
+                            : '#b14437',
+                    }"
+                  >
+                    {{ $t('loans.remaining') }}: {{ settings.currency
+                    }}{{ settings.formatNumber(detailRemaining) }}
                   </div>
                 </div>
                 <div v-if="detailLoan?.notes" class="text-caption text-grey-7 q-mt-sm">
@@ -492,8 +889,15 @@
                   <q-chip dense size="sm" color="amber-8" text-color="white" icon="percent">
                     {{ detailLoan.interestRate }}%
                   </q-chip>
-                  <q-chip dense size="sm" color="blue-grey-7" text-color="white" icon="event_repeat">
-                    {{ detailLoan.installmentCount }} {{ getFrequencyLabel(detailLoan.installmentFrequency) }}
+                  <q-chip
+                    dense
+                    size="sm"
+                    color="blue-grey-7"
+                    text-color="white"
+                    icon="event_repeat"
+                  >
+                    {{ detailLoan.installmentCount }}
+                    {{ getFrequencyLabel(detailLoan.installmentFrequency) }}
                   </q-chip>
                 </div>
               </q-card-section>
@@ -502,15 +906,40 @@
             <!-- Installment Schedule (for loan type) -->
             <template v-if="detailLoan?.type === 'loan'">
               <div class="page-section-title">{{ $t('loans.installmentSchedule') }}</div>
-              <q-card v-if="detailLoan?.installments?.length" class="finance-card" style="overflow: hidden;">
+              <q-card
+                v-if="detailLoan?.installments?.length"
+                class="finance-card"
+                style="overflow: hidden"
+              >
                 <q-list separator>
                   <div v-for="(inst, idx) in detailLoan.installments" :key="idx">
-                    <q-item class="touch-target" style="flex-direction: column; align-items: stretch; padding: 0;">
+                    <q-item
+                      class="touch-target"
+                      style="flex-direction: column; align-items: stretch; padding: 0"
+                    >
                       <div class="row items-center q-pa-sm q-px-md">
                         <q-item-section avatar>
-                          <q-avatar :style="{ background: inst.paid ? '#2f7d5c15' : (inst.paidAmount > 0 ? '#f59e0b30' : '#f59e0b15') }" size="40px">
-                            <q-icon :name="inst.paid ? 'check_circle' : (inst.paidAmount > 0 ? 'pending' : 'schedule')"
-                              :style="{ color: inst.paid ? '#2f7d5c' : '#f59e0b' }" size="20px" />
+                          <q-avatar
+                            :style="{
+                              background: inst.paid
+                                ? '#2f7d5c15'
+                                : inst.paidAmount > 0
+                                  ? '#f59e0b30'
+                                  : '#f59e0b15',
+                            }"
+                            size="40px"
+                          >
+                            <q-icon
+                              :name="
+                                inst.paid
+                                  ? 'check_circle'
+                                  : inst.paidAmount > 0
+                                    ? 'pending'
+                                    : 'schedule'
+                              "
+                              :style="{ color: inst.paid ? '#2f7d5c' : '#f59e0b' }"
+                              size="20px"
+                            />
                           </q-avatar>
                         </q-item-section>
                         <q-item-section>
@@ -519,38 +948,84 @@
                           </q-item-label>
                           <q-item-label caption>
                             {{ formatDate(inst.dueDate) }}
-                            <span v-if="inst.paid" class="text-positive"> &middot; {{ $t('loans.paidOn') }} {{ formatDate(inst.paidDate) }}</span>
-                            <span v-else-if="inst.paidAmount > 0" style="color: #f59e0b;"> &middot; {{ $t('loans.installmentPaidSoFar') }}: {{ settings.currency }}{{ settings.formatNumber(inst.paidAmount) }}</span>
+                            <span v-if="inst.paid" class="text-positive">
+                              &middot; {{ $t('loans.paidOn') }}
+                              {{ formatDate(inst.paidDate) }}</span
+                            >
+                            <span v-else-if="inst.paidAmount > 0" style="color: #f59e0b">
+                              &middot; {{ $t('loans.installmentPaidSoFar') }}: {{ settings.currency
+                              }}{{ settings.formatNumber(inst.paidAmount) }}</span
+                            >
                           </q-item-label>
                         </q-item-section>
                         <q-item-section side class="text-right">
-                          <div class="text-weight-bold q-mb-xs" :style="{ color: inst.paid ? '#2f7d5c' : '#333' }">
-                            {{ settings.currency }}{{ settings.formatNumber(inst.paid ? inst.paidAmount : inst.amount) }}
+                          <div
+                            class="text-weight-bold q-mb-xs"
+                            :style="{ color: inst.paid ? '#2f7d5c' : '#333' }"
+                          >
+                            {{ settings.currency
+                            }}{{ settings.formatNumber(inst.paid ? inst.paidAmount : inst.amount) }}
                           </div>
-                          <div v-if="!inst.paid && !detailLoan?.settled" class="column q-gutter-xs items-end">
-                            <q-btn flat dense size="sm" color="positive"
-                              icon="payment" :label="$t('loans.confirmPay')"
-                              @click.stop="openConfirmInstallment(inst, idx)" style="border-radius: 8px;" />
-                            <q-btn flat dense size="sm" color="grey-7"
-                              icon="check_circle_outline" :label="$t('loans.alreadyPaid')"
-                              @click.stop="openAlreadyPaidDialog(inst, idx)" style="border-radius: 8px;" />
+                          <div
+                            v-if="!inst.paid && !detailLoan?.settled"
+                            class="column q-gutter-xs items-end"
+                          >
+                            <q-btn
+                              flat
+                              dense
+                              size="sm"
+                              color="positive"
+                              icon="payment"
+                              :label="$t('loans.confirmPay')"
+                              @click.stop="openConfirmInstallment(inst, idx)"
+                              style="border-radius: 8px"
+                            />
+                            <q-btn
+                              flat
+                              dense
+                              size="sm"
+                              color="grey-7"
+                              icon="check_circle_outline"
+                              :label="$t('loans.alreadyPaid')"
+                              @click.stop="openAlreadyPaidDialog(inst, idx)"
+                              style="border-radius: 8px"
+                            />
                           </div>
                           <div v-else-if="inst.paid" class="column q-gutter-xs items-end">
-                            <q-btn flat dense size="sm" color="warning"
-                              icon="undo" :label="$t('loans.undo')"
-                              @click.stop="confirmResetInstallment(inst, idx)" style="border-radius: 8px;" />
+                            <q-btn
+                              flat
+                              dense
+                              size="sm"
+                              color="warning"
+                              icon="undo"
+                              :label="$t('loans.undo')"
+                              @click.stop="confirmResetInstallment(inst, idx)"
+                              style="border-radius: 8px"
+                            />
                           </div>
                         </q-item-section>
                       </div>
                       <!-- Sub-payment history -->
-                      <div v-if="inst.payments && inst.payments.length" style="background: var(--card-cream); border-top: 1px solid var(--card-border);">
-                        <div v-for="(p, pIdx) in [...inst.payments].sort((a,b) => (a.createdAt||0)-(b.createdAt||0))" :key="pIdx"
-                          class="row items-center justify-between q-px-md q-py-xs" style="font-size: 0.82rem;">
+                      <div
+                        v-if="inst.payments && inst.payments.length"
+                        style="
+                          background: var(--card-cream);
+                          border-top: 1px solid var(--card-border);
+                        "
+                      >
+                        <div
+                          v-for="(p, pIdx) in [...inst.payments].sort(
+                            (a, b) => (a.createdAt || 0) - (b.createdAt || 0),
+                          )"
+                          :key="pIdx"
+                          class="row items-center justify-between q-px-md q-py-xs"
+                          style="font-size: 0.82rem"
+                        >
                           <div class="row items-center q-gutter-xs">
                             <q-icon name="subdirectory_arrow_right" size="14px" color="grey-5" />
                             <span class="text-grey-7">{{ formatDate(p.date) }}</span>
                           </div>
-                          <span class="text-weight-medium" style="color: #f59e0b;">
+                          <span class="text-weight-medium" style="color: #f59e0b">
                             +{{ settings.currency }}{{ settings.formatNumber(p.amount) }}
                           </span>
                         </div>
@@ -563,60 +1038,95 @@
 
             <!-- Payment History (for receivable/payable) -->
             <template v-else>
-            <div class="page-section-title">{{ $t('loans.paymentHistory') }}</div>
-            <div v-if="detailLoan?.payments?.length">
-              <div class="text-center q-mb-xs text-grey-6" style="font-size: 12px;">
-                <q-icon name="swipe" size="16px" class="q-mr-xs" />
-                {{ $t('loans.swipeHint') }}
+              <div class="page-section-title">{{ $t('loans.paymentHistory') }}</div>
+              <div v-if="detailLoan?.payments?.length">
+                <div class="text-center q-mb-xs text-grey-6" style="font-size: 12px">
+                  <q-icon name="swipe" size="16px" class="q-mr-xs" />
+                  {{ $t('loans.swipeHint') }}
+                </div>
+                <q-card class="finance-card" style="overflow: hidden">
+                  <q-list separator>
+                    <q-slide-item
+                      v-for="(p, idx) in sortedPayments"
+                      :key="p.createdAt || idx"
+                      @left="({ reset }) => onEditPayment(p, reset)"
+                      @right="({ reset }) => onDeletePayment(p, reset)"
+                    >
+                      <template v-slot:left>
+                        <div class="row items-center">
+                          <q-icon name="edit" color="info" />
+                        </div>
+                      </template>
+                      <template v-slot:right>
+                        <div class="row items-center">
+                          <q-icon name="delete" color="negative" />
+                        </div>
+                      </template>
+                      <q-item class="touch-target">
+                        <q-item-section avatar>
+                          <q-avatar
+                            :style="{
+                              background:
+                                (detailLoan?.type === 'receivable' ? '#2f7d5c' : '#b14437') + '15',
+                            }"
+                            size="40px"
+                          >
+                            <q-icon
+                              name="payment"
+                              :style="{
+                                color: detailLoan?.type === 'receivable' ? '#2f7d5c' : '#b14437',
+                              }"
+                              size="20px"
+                            />
+                          </q-avatar>
+                        </q-item-section>
+                        <q-item-section>
+                          <q-item-label
+                            class="text-weight-bold"
+                            :style="{
+                              color: detailLoan?.type === 'receivable' ? '#2f7d5c' : '#b14437',
+                            }"
+                          >
+                            {{ settings.currency }}{{ settings.formatNumber(p.amount) }}
+                          </q-item-label>
+                          <q-item-label caption
+                            >{{ formatDate(p.date)
+                            }}<span v-if="p.notes"> &middot; {{ p.notes }}</span></q-item-label
+                          >
+                        </q-item-section>
+                        <q-item-section side>
+                          <q-icon
+                            name="check_circle"
+                            :color="detailLoan?.type === 'receivable' ? 'positive' : 'negative'"
+                            size="22px"
+                          />
+                        </q-item-section>
+                      </q-item>
+                    </q-slide-item>
+                  </q-list>
+                </q-card>
               </div>
-              <q-card class="finance-card" style="overflow: hidden;">
-                <q-list separator>
-                  <q-slide-item v-for="(p, idx) in sortedPayments" :key="p.createdAt || idx"
-                    @left="({ reset }) => onEditPayment(p, reset)"
-                    @right="({ reset }) => onDeletePayment(p, reset)">
-                    <template v-slot:left>
-                      <div class="row items-center">
-                        <q-icon name="edit" color="info" />
-                      </div>
-                    </template>
-                    <template v-slot:right>
-                      <div class="row items-center">
-                        <q-icon name="delete" color="negative" />
-                      </div>
-                    </template>
-                    <q-item class="touch-target">
-                      <q-item-section avatar>
-                        <q-avatar :style="{ background: (detailLoan?.type === 'receivable' ? '#2f7d5c' : '#b14437') + '15' }" size="40px">
-                          <q-icon name="payment" :style="{ color: detailLoan?.type === 'receivable' ? '#2f7d5c' : '#b14437' }" size="20px" />
-                        </q-avatar>
-                      </q-item-section>
-                      <q-item-section>
-                        <q-item-label class="text-weight-bold"
-                          :style="{ color: detailLoan?.type === 'receivable' ? '#2f7d5c' : '#b14437' }">
-                          {{ settings.currency }}{{ settings.formatNumber(p.amount) }}
-                        </q-item-label>
-                        <q-item-label caption>{{ formatDate(p.date) }}<span v-if="p.notes"> &middot; {{ p.notes }}</span></q-item-label>
-                      </q-item-section>
-                      <q-item-section side>
-                        <q-icon name="check_circle"
-                          :color="detailLoan?.type === 'receivable' ? 'positive' : 'negative'" size="22px" />
-                      </q-item-section>
-                    </q-item>
-                  </q-slide-item>
-                </q-list>
-              </q-card>
-            </div>
-            <div v-else class="empty-state q-mt-md">
-              <q-icon name="history" size="48px" />
-              <div class="empty-state-title">{{ $t('loans.noPayments') }}</div>
-            </div>
+              <div v-else class="empty-state q-mt-md">
+                <q-icon name="history" size="48px" />
+                <div class="empty-state-title">{{ $t('loans.noPayments') }}</div>
+              </div>
 
-            <!-- Pay Button -->
-            <q-btn v-if="!detailLoan?.settled" class="full-width bg-primary-gradient q-mt-md" text-color="white"
-              rounded unelevated size="lg"
-              :icon="detailLoan?.type === 'receivable' ? 'call_received' : 'call_made'"
-              :label="detailLoan?.type === 'receivable' ? $t('loans.receivePayment') : $t('loans.makePayment')"
-              @click="openPaymentFromDetail" />
+              <!-- Pay Button -->
+              <q-btn
+                v-if="!detailLoan?.settled"
+                class="full-width bg-primary-gradient q-mt-md"
+                text-color="white"
+                rounded
+                unelevated
+                size="lg"
+                :icon="detailLoan?.type === 'receivable' ? 'call_received' : 'call_made'"
+                :label="
+                  detailLoan?.type === 'receivable'
+                    ? $t('loans.receivePayment')
+                    : $t('loans.makePayment')
+                "
+                @click="openPaymentFromDetail"
+              />
             </template>
           </div>
         </q-page-container>
@@ -625,24 +1135,56 @@
 
     <!-- Edit Payment Dialog -->
     <q-dialog v-model="showEditPaymentDialog">
-      <q-card style="border-radius: 10px; width: 100%; max-width: 500px; background: white;">
+      <q-card style="border-radius: 10px; width: 100%; max-width: 500px; background: white">
         <q-card-section class="row items-center justify-between no-wrap q-pb-none">
-          <div class="text-h6 text-weight-bold q-pl-sm" style="color: var(--text-primary);">
+          <div class="text-h6 text-weight-bold q-pl-sm" style="color: var(--text-primary)">
             {{ $t('loans.editPayment') }}
           </div>
-          <q-btn icon="close" flat round dense v-close-popup style="background: var(--card-cream); color: var(--text-muted);" />
+          <q-btn
+            icon="close"
+            flat
+            round
+            dense
+            v-close-popup
+            style="background: var(--card-cream); color: var(--text-muted)"
+          />
         </q-card-section>
         <q-card-section>
           <q-form @submit.prevent="saveEditedPayment">
-            <q-input v-model.number="editPaymentForm.amount" :label="$t('common.amount')" type="number" outlined dense
-              color="dark" :prefix="settings.currency"
-              :rules="[val => val > 0 || $t('common.validAmount')]" style="margin-bottom: 10px;" />
+            <q-input
+              v-model.number="editPaymentForm.amount"
+              :label="$t('common.amount')"
+              type="number"
+              outlined
+              dense
+              color="dark"
+              :prefix="settings.currency"
+              :rules="[(val) => val > 0 || $t('common.validAmount')]"
+              style="margin-bottom: 10px"
+            />
 
-            <q-select v-model="editPaymentForm.accountId" :options="accountOptions" :label="$t('common.account')" outlined
-              dense color="dark" emit-value map-options style="margin-bottom: 10px;" />
+            <q-select
+              v-model="editPaymentForm.accountId"
+              :options="accountOptions"
+              :label="$t('common.account')"
+              outlined
+              dense
+              color="dark"
+              emit-value
+              map-options
+              style="margin-bottom: 10px"
+            />
 
-            <q-input v-model="editPaymentForm.date" :label="$t('common.date')" outlined dense color="dark" readonly
-              :rules="[val => !!val || $t('common.dateRequired')]" style="margin-bottom: 10px;">
+            <q-input
+              v-model="editPaymentForm.date"
+              :label="$t('common.date')"
+              outlined
+              dense
+              color="dark"
+              readonly
+              :rules="[(val) => !!val || $t('common.dateRequired')]"
+              style="margin-bottom: 10px"
+            >
               <template v-slot:append>
                 <q-icon name="event" class="cursor-pointer">
                   <q-popup-proxy cover transition-show="scale" transition-hide="scale">
@@ -652,11 +1194,26 @@
               </template>
             </q-input>
 
-            <q-input v-model="editPaymentForm.notes" :label="$t('common.noteOptional')" outlined dense color="dark"
-              type="textarea" rows="2" style="margin-bottom: 10px;" />
+            <q-input
+              v-model="editPaymentForm.notes"
+              :label="$t('common.noteOptional')"
+              outlined
+              dense
+              color="dark"
+              type="textarea"
+              rows="2"
+              style="margin-bottom: 10px"
+            />
 
-            <q-btn type="submit" class="full-width bg-primary-gradient" text-color="white" rounded unelevated
-              :label="$t('common.update')" :loading="editPaymentSaving" />
+            <q-btn
+              type="submit"
+              class="full-width bg-primary-gradient"
+              text-color="white"
+              rounded
+              unelevated
+              :label="$t('common.update')"
+              :loading="editPaymentSaving"
+            />
           </q-form>
         </q-card-section>
       </q-card>
@@ -664,20 +1221,42 @@
 
     <!-- Delete Payment Confirm Dialog -->
     <q-dialog v-model="showDeletePaymentDialog">
-      <q-card style="border-radius: 10px; width: 100%; max-width: 420px; background: white;">
+      <q-card style="border-radius: 10px; width: 100%; max-width: 420px; background: white">
         <q-card-section>
           <div class="text-h6 text-weight-bold q-mb-sm">{{ $t('loans.deletePaymentTitle') }}</div>
           <div class="text-body2 text-grey-8 q-mb-md">
-            {{ settings.currency }}{{ settings.formatNumber(deletingPayment?.amount || 0) }} — {{ $t('loans.deletePaymentConfirm') }}
+            {{ settings.currency }}{{ settings.formatNumber(deletingPayment?.amount || 0) }} —
+            {{ $t('loans.deletePaymentConfirm') }}
           </div>
           <div class="column q-gutter-sm">
-            <q-btn v-if="deletingPayment?.accountId"
-              :label="detailLoan?.type === 'receivable' ? $t('loans.deletePaymentDeduct') : $t('loans.deletePaymentRefund')"
+            <q-btn
+              v-if="deletingPayment?.accountId"
+              :label="
+                detailLoan?.type === 'receivable'
+                  ? $t('loans.deletePaymentDeduct')
+                  : $t('loans.deletePaymentRefund')
+              "
               :icon="detailLoan?.type === 'receivable' ? 'money_off' : 'savings'"
-              color="negative" unelevated class="full-width" @click="deletePaymentWithRefund" />
-            <q-btn :label="$t('loans.deletePaymentOnly')" icon="delete_forever" outline color="negative"
-              class="full-width" @click="deletePaymentOnly" />
-            <q-btn :label="$t('common.cancel')" flat color="grey-7" class="full-width" @click="cancelDeletePayment" />
+              color="negative"
+              unelevated
+              class="full-width"
+              @click="deletePaymentWithRefund"
+            />
+            <q-btn
+              :label="$t('loans.deletePaymentOnly')"
+              icon="delete_forever"
+              outline
+              color="negative"
+              class="full-width"
+              @click="deletePaymentOnly"
+            />
+            <q-btn
+              :label="$t('common.cancel')"
+              flat
+              color="grey-7"
+              class="full-width"
+              @click="cancelDeletePayment"
+            />
           </div>
         </q-card-section>
       </q-card>
@@ -685,20 +1264,31 @@
 
     <!-- Already Paid Dialog (no transaction) -->
     <q-dialog v-model="showAlreadyPaidDialog">
-      <q-card style="border-radius: 10px; width: 100%; max-width: 500px; background: white;">
+      <q-card style="border-radius: 10px; width: 100%; max-width: 500px; background: white">
         <q-card-section class="row items-center justify-between no-wrap q-pb-none">
-          <div class="text-h6 text-weight-bold q-pl-sm" style="color: var(--text-primary);">
+          <div class="text-h6 text-weight-bold q-pl-sm" style="color: var(--text-primary)">
             {{ $t('loans.alreadyPaidTitle') }}
           </div>
-          <q-btn icon="close" flat round dense v-close-popup style="background: var(--card-cream); color: var(--text-muted);" />
+          <q-btn
+            icon="close"
+            flat
+            round
+            dense
+            v-close-popup
+            style="background: var(--card-cream); color: var(--text-muted)"
+          />
         </q-card-section>
         <q-card-section>
-          <div class="q-mb-md" style="background: var(--card-cream); border-radius: 8px; padding: 12px;">
+          <div
+            class="q-mb-md"
+            style="background: var(--card-cream); border-radius: 8px; padding: 12px"
+          >
             <div class="text-subtitle2 text-weight-bold">
               {{ $t('loans.installment') }} #{{ alreadyPaidInstallment?.number }}
             </div>
             <div class="text-caption text-grey-7">
-              {{ $t('loans.scheduledAmount') }}: {{ settings.currency }}{{ settings.formatNumber(alreadyPaidInstallment?.amount || 0) }}
+              {{ $t('loans.scheduledAmount') }}: {{ settings.currency
+              }}{{ settings.formatNumber(alreadyPaidInstallment?.amount || 0) }}
             </div>
             <div class="text-caption text-grey-7">
               {{ $t('loans.dueDate') }}: {{ formatDate(alreadyPaidInstallment?.dueDate) }}
@@ -706,14 +1296,35 @@
           </div>
           <div class="q-mb-md text-body2 text-grey-8">{{ $t('loans.alreadyPaidNote') }}</div>
           <q-form @submit.prevent="doMarkAlreadyPaid">
-            <q-input v-model.number="alreadyPaidAmount" :label="$t('loans.actualPaidAmount')" type="number"
-              outlined dense color="dark" :prefix="settings.currency"
-              :rules="[val => val > 0 || $t('common.validAmount')]" style="margin-bottom: 16px;" />
+            <q-input
+              v-model.number="alreadyPaidAmount"
+              :label="$t('loans.actualPaidAmount')"
+              type="number"
+              outlined
+              dense
+              color="dark"
+              :prefix="settings.currency"
+              :rules="[(val) => val > 0 || $t('common.validAmount')]"
+              style="margin-bottom: 16px"
+            />
             <div class="row q-gutter-sm">
-              <q-btn type="submit" class="col bg-primary-gradient" text-color="white" rounded unelevated
-                :label="$t('loans.alreadyPaidConfirm')" :loading="alreadyPaidSaving" />
-              <q-btn class="col" flat rounded color="grey-7" :label="$t('common.cancel')"
-                @click="showAlreadyPaidDialog = false" />
+              <q-btn
+                type="submit"
+                class="col bg-primary-gradient"
+                text-color="white"
+                rounded
+                unelevated
+                :label="$t('loans.alreadyPaidConfirm')"
+                :loading="alreadyPaidSaving"
+              />
+              <q-btn
+                class="col"
+                flat
+                rounded
+                color="grey-7"
+                :label="$t('common.cancel')"
+                @click="showAlreadyPaidDialog = false"
+              />
             </div>
           </q-form>
         </q-card-section>
@@ -722,43 +1333,87 @@
 
     <!-- Confirm Installment Dialog -->
     <q-dialog v-model="showConfirmInstallmentDialog">
-      <q-card style="border-radius: 10px; width: 100%; max-width: 500px; background: white;">
+      <q-card style="border-radius: 10px; width: 100%; max-width: 500px; background: white">
         <q-card-section class="row items-center justify-between no-wrap q-pb-none">
-          <div class="text-h6 text-weight-bold q-pl-sm" style="color: var(--text-primary);">
+          <div class="text-h6 text-weight-bold q-pl-sm" style="color: var(--text-primary)">
             {{ $t('loans.confirmInstallment') }}
           </div>
-          <q-btn icon="close" flat round dense v-close-popup style="background: var(--card-cream); color: var(--text-muted);" />
+          <q-btn
+            icon="close"
+            flat
+            round
+            dense
+            v-close-popup
+            style="background: var(--card-cream); color: var(--text-muted)"
+          />
         </q-card-section>
         <q-card-section>
-          <div class="q-mb-md" style="background: var(--card-cream); border-radius: 8px; padding: 12px;">
+          <div
+            class="q-mb-md"
+            style="background: var(--card-cream); border-radius: 8px; padding: 12px"
+          >
             <div class="text-subtitle2 text-weight-bold">
               {{ $t('loans.installment') }} #{{ confirmingInstallment?.number }}
             </div>
             <div class="text-caption text-grey-7">
-              {{ $t('loans.scheduledAmount') }}: {{ settings.currency }}{{ settings.formatNumber(confirmingInstallment?.amount || 0) }}
+              {{ $t('loans.scheduledAmount') }}: {{ settings.currency
+              }}{{ settings.formatNumber(confirmingInstallment?.amount || 0) }}
             </div>
-            <div v-if="confirmingInstallment?.paidAmount > 0" class="text-caption" style="color: #f59e0b;">
-              {{ $t('loans.installmentPaidSoFar') }}: {{ settings.currency }}{{ settings.formatNumber(confirmingInstallment?.paidAmount || 0) }}
+            <div
+              v-if="confirmingInstallment?.paidAmount > 0"
+              class="text-caption"
+              style="color: #f59e0b"
+            >
+              {{ $t('loans.installmentPaidSoFar') }}: {{ settings.currency
+              }}{{ settings.formatNumber(confirmingInstallment?.paidAmount || 0) }}
             </div>
             <div class="text-caption text-grey-7">
               {{ $t('loans.dueDate') }}: {{ formatDate(confirmingInstallment?.dueDate) }}
             </div>
           </div>
           <q-form @submit.prevent="doConfirmInstallment">
-            <q-input v-model.number="confirmInstallmentAmount" :label="$t('loans.actualPaidAmount')" type="number"
-              outlined dense color="dark" :prefix="settings.currency"
-              :rules="[val => val > 0 || $t('common.validAmount')]" style="margin-bottom: 10px;" />
-            <q-select v-model="confirmInstallmentAccountId" :options="accountOptions" :label="$t('common.account')"
-              outlined dense color="dark" emit-value map-options
-              :rules="[val => !!val || $t('common.accountRequired')]" style="margin-bottom: 10px;" />
-            <q-checkbox v-model="confirmMarkAsPaid" :label="$t('loans.markAsPaid')" color="positive" class="q-mb-md" />
-            <q-btn type="submit" class="full-width bg-primary-gradient" text-color="white" rounded unelevated
-              :label="$t('loans.confirmPay')" :loading="confirmingInstallmentSaving" />
+            <q-input
+              v-model.number="confirmInstallmentAmount"
+              :label="$t('loans.actualPaidAmount')"
+              type="number"
+              outlined
+              dense
+              color="dark"
+              :prefix="settings.currency"
+              :rules="[(val) => val > 0 || $t('common.validAmount')]"
+              style="margin-bottom: 10px"
+            />
+            <q-select
+              v-model="confirmInstallmentAccountId"
+              :options="accountOptions"
+              :label="$t('common.account')"
+              outlined
+              dense
+              color="dark"
+              emit-value
+              map-options
+              :rules="[(val) => !!val || $t('common.accountRequired')]"
+              style="margin-bottom: 10px"
+            />
+            <q-checkbox
+              v-model="confirmMarkAsPaid"
+              :label="$t('loans.markAsPaid')"
+              color="positive"
+              class="q-mb-md"
+            />
+            <q-btn
+              type="submit"
+              class="full-width bg-primary-gradient"
+              text-color="white"
+              rounded
+              unelevated
+              :label="$t('loans.confirmPay')"
+              :loading="confirmingInstallmentSaving"
+            />
           </q-form>
         </q-card-section>
       </q-card>
     </q-dialog>
-
   </q-page>
 </template>
 
@@ -770,7 +1425,7 @@ import { useLoanStore } from 'stores/loanStore'
 import { useTransactionStore } from 'stores/transactionStore'
 import { useAccountStore } from 'stores/accountStore'
 import { useSettingsStore } from 'stores/settingsStore'
-import LoanCard from 'components/LoanCard.vue'
+// import LoanCard from 'components/LoanCard.vue'
 
 const { t } = useI18n()
 const $q = useQuasar()
@@ -865,17 +1520,19 @@ const remainingAmount = computed(() => {
 
 const detailRemaining = computed(() => {
   if (!detailLoan.value) return 0
-  const total = detailLoan.value.type === 'loan'
-    ? (detailLoan.value.totalAmount || detailLoan.value.amount || 0)
-    : (detailLoan.value.amount || 0)
+  const total =
+    detailLoan.value.type === 'loan'
+      ? detailLoan.value.totalAmount || detailLoan.value.amount || 0
+      : detailLoan.value.amount || 0
   return total - (detailLoan.value.paidAmount || 0)
 })
 
 const progressValue = computed(() => {
   if (!detailLoan.value) return 0
-  const total = detailLoan.value.type === 'loan'
-    ? (detailLoan.value.totalAmount || detailLoan.value.amount || 0)
-    : (detailLoan.value.amount || 0)
+  const total =
+    detailLoan.value.type === 'loan'
+      ? detailLoan.value.totalAmount || detailLoan.value.amount || 0
+      : detailLoan.value.amount || 0
   if (!total) return 0
   return (detailLoan.value.paidAmount || 0) / total
 })
@@ -909,13 +1566,20 @@ function settledLoans(list) {
 function formatDate(dateStr) {
   if (!dateStr) return ''
   const locale = settings.language === 'bn' ? 'bn-BD' : 'en-US'
-  return new Date(dateStr).toLocaleDateString(locale, { year: 'numeric', month: 'short', day: 'numeric' })
+  return new Date(dateStr).toLocaleDateString(locale, {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
+  })
 }
 
 function formatMonth(ym) {
   const [y, m] = ym.split('-')
   const locale = settings.language === 'bn' ? 'bn-BD' : 'en-US'
-  return new Date(parseInt(y), parseInt(m) - 1, 1).toLocaleDateString(locale, { year: 'numeric', month: 'long' })
+  return new Date(parseInt(y), parseInt(m) - 1, 1).toLocaleDateString(locale, {
+    year: 'numeric',
+    month: 'long',
+  })
 }
 
 function isCurrentMonth(ym) {
@@ -974,7 +1638,12 @@ async function saveLoanEntry() {
 }
 
 function getFrequencyLabel(freq) {
-  const map = { daily: t('loans.daily'), weekly: t('loans.weekly'), monthly: t('loans.monthly'), yearly: t('loans.yearly') }
+  const map = {
+    daily: t('loans.daily'),
+    weekly: t('loans.weekly'),
+    monthly: t('loans.monthly'),
+    yearly: t('loans.yearly'),
+  }
   return map[freq] || freq
 }
 
@@ -1034,7 +1703,8 @@ function openConfirmInstallment(inst, idx) {
   const alreadyPaid = inst.paidAmount || 0
   const remaining = Math.max(0, inst.amount - alreadyPaid)
   confirmInstallmentAmount.value = remaining > 0 ? remaining : inst.amount
-  confirmInstallmentAccountId.value = detailLoan.value?.accountId || accountStore.accounts[0]?.id || null
+  confirmInstallmentAccountId.value =
+    detailLoan.value?.accountId || accountStore.accounts[0]?.id || null
   confirmMarkAsPaid.value = true
   showConfirmInstallmentDialog.value = true
 }
@@ -1184,7 +1854,9 @@ function openDetail(loan) {
 
 function onEditPayment(payment, reset) {
   reset()
-  const originalIndex = detailLoan.value.payments.findIndex((p) => p.createdAt === payment.createdAt)
+  const originalIndex = detailLoan.value.payments.findIndex(
+    (p) => p.createdAt === payment.createdAt,
+  )
   if (originalIndex < 0) return
   editingPaymentIndex.value = originalIndex
   editPaymentForm.amount = payment.amount
@@ -1242,7 +1914,9 @@ async function saveEditedPayment() {
 
 function onDeletePayment(payment, reset) {
   reset()
-  const originalIndex = detailLoan.value.payments.findIndex((p) => p.createdAt === payment.createdAt)
+  const originalIndex = detailLoan.value.payments.findIndex(
+    (p) => p.createdAt === payment.createdAt,
+  )
   if (originalIndex < 0) return
   deletingPayment.value = payment
   deletingPaymentIndex.value = originalIndex
@@ -1336,4 +2010,3 @@ onUnmounted(() => {
   transactionStore.stopListening()
 })
 </script>
-
