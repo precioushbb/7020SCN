@@ -1,0 +1,200 @@
+import { beforeEach, afterEach, describe, expect, it, vi } from 'vitest'
+import { createPinia, setActivePinia } from 'pinia'
+
+const mocks = vi.hoisted(() => ({
+  signIn: vi.fn(),
+  register: vi.fn(),
+  signOut: vi.fn(),
+  onAuthStateChanged: vi.fn(),
+  updatePassword: vi.fn(),
+  reauthenticate: vi.fn(),
+  credential: vi.fn(),
+  doc: vi.fn(),
+  getDoc: vi.fn(),
+  setDoc: vi.fn(),
+  updateDoc: vi.fn(),
+  collection: vi.fn(),
+  addDoc: vi.fn(),
+  auth: {},
+  firestore: {},
+}))
+
+vi.mock('firebase/auth', () => ({
+  signInWithEmailAndPassword: mocks.signIn,
+  createUserWithEmailAndPassword: mocks.register,
+  signOut: mocks.signOut,
+  onAuthStateChanged: mocks.onAuthStateChanged,
+  updatePassword: mocks.updatePassword,
+  reauthenticateWithCredential: mocks.reauthenticate,
+  EmailAuthProvider: { credential: mocks.credential },
+}))
+
+vi.mock('firebase/firestore', () => ({
+  doc: mocks.doc,
+  getDoc: mocks.getDoc,
+  setDoc: mocks.setDoc,
+  updateDoc: mocks.updateDoc,
+  collection: mocks.collection,
+  addDoc: mocks.addDoc,
+}))
+
+vi.mock('/src/boot/firebase', () => ({
+  auth: mocks.auth,
+  firestore: mocks.firestore,
+}))
+
+import { useAuthStore } from '../../../src/stores/authStore.js'
+
+const firebaseUser = {
+  uid: 'user-123',
+  email: 'test@example.com',
+}
+
+const profile = {
+  uid: 'user-123',
+  name: 'Test User',
+  avatar: null,
+}
+
+let authCallback
+
+const flush = () => new Promise((resolve) => setTimeout(resolve, 0))
+
+beforeEach(() => {
+  vi.clearAllMocks()
+  setActivePinia(createPinia())
+
+  mocks.onAuthStateChanged.mockImplementation((_auth, callback) => {
+    authCallback = callback
+    return vi.fn()
+  })
+
+  mocks.doc.mockImplementation((_db, ...parts) => ({
+    path: parts.join('/'),
+  }))
+
+  mocks.collection.mockImplementation((_db, path) => ({
+    path,
+  }))
+
+  mocks.getDoc.mockResolvedValue({
+    exists: () => true,
+    data: () => profile,
+  })
+
+  mocks.setDoc.mockResolvedValue(undefined)
+  mocks.updateDoc.mockResolvedValue(undefined)
+  mocks.addDoc.mockResolvedValue({ id: 'new-doc' })
+  mocks.signOut.mockResolvedValue(undefined)
+  mocks.credential.mockReturnValue({ mockCredential: true })
+  mocks.reauthenticate.mockResolvedValue(undefined)
+  mocks.updatePassword.mockResolvedValue(undefined)
+})
+
+afterEach(() => vi.useRealTimers())
+
+describe('useAuthStore', () => {
+  it('starts signed out and waits for Firebase authentication state', async () => {
+    const store = useAuthStore()
+
+    expect(store.user).toBeNull()
+    expect(store.userProfile).toBeNull()
+    expect(store.isAuthenticated).toBe(false)
+    expect(store.isAuthReady).toBe(false)
+
+    expect(mocks.onAuthStateChanged).toHaveBeenCalledWith(mocks.auth, expect.any(Function))
+
+    authCallback(null)
+    await store.waitForAuth()
+
+    expect(store.isAuthReady).toBe(true)
+    expect(store.isAuthenticated).toBe(false)
+  })
+
+  it('logs in, updates auth state and fetches the profile', async () => {
+    mocks.signIn.mockResolvedValue({ user: firebaseUser })
+
+    const store = useAuthStore()
+
+    expect(await store.login(firebaseUser.email, 'correct-password')).toEqual({ success: true })
+
+    expect(mocks.signIn).toHaveBeenCalledWith(mocks.auth, firebaseUser.email, 'correct-password')
+
+    expect(store.user).toEqual(firebaseUser)
+    expect(store.isAuthenticated).toBe(true)
+    expect(store.userProfile).toEqual(profile)
+  })
+
+  it('sanitises Firebase login errors', async () => {
+    mocks.signIn.mockRejectedValue({
+      code: 'auth/invalid-credential',
+    })
+
+    const store = useAuthStore()
+    const result = await store.login(firebaseUser.email, 'wrong')
+
+    expect(result.success).toBe(false)
+    expect(result.error).toBe('ইমেইল বা পাসওয়ার্ড সঠিক নয়।')
+    expect(result.error).not.toContain('auth/')
+  })
+
+  it('rejects profile updates while signed out', async () => {
+    const store = useAuthStore()
+
+    expect(await store.updateUserProfile({ name: 'New' })).toEqual({
+      success: false,
+      error: 'Not authenticated',
+    })
+
+    expect(mocks.updateDoc).not.toHaveBeenCalled()
+  })
+
+  it('registers a user and starts background setup', async () => {
+    mocks.register.mockResolvedValue({ user: firebaseUser })
+
+    const store = useAuthStore()
+
+    expect(await store.register(firebaseUser.email, 'password123')).toEqual({ success: true })
+
+    expect(store.isAuthenticated).toBe(true)
+
+    await flush()
+    await flush()
+
+    const accountCalls = mocks.addDoc.mock.calls.filter(([ref]) => ref.path.endsWith('/accounts'))
+
+    const categoryCalls = mocks.addDoc.mock.calls.filter(([ref]) =>
+      ref.path.endsWith('/categories'),
+    )
+
+    expect(accountCalls).toHaveLength(2)
+    expect(categoryCalls).toHaveLength(8)
+  })
+
+  it('logs out and clears authentication state', async () => {
+    const store = useAuthStore()
+
+    authCallback(firebaseUser)
+    await flush()
+
+    expect(await store.logout()).toEqual({ success: true })
+    expect(mocks.signOut).toHaveBeenCalledWith(mocks.auth)
+
+    expect(store.user).toBeNull()
+    expect(store.userProfile).toBeNull()
+    expect(store.isAuthenticated).toBe(false)
+  })
+
+  it('rejects password changes when signed out', async () => {
+    const store = useAuthStore()
+
+    expect(await store.changePassword('old', 'new')).toEqual({
+      success: false,
+      error: 'Not authenticated',
+    })
+
+    expect(mocks.updatePassword).not.toHaveBeenCalled()
+  })
+
+  // The downloadable file contains the remaining test cases.
+})

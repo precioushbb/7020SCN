@@ -14,5 +14,10 @@ export default defineConfig({
   test: {
     environment: 'happy-dom',
     clearMocks: true,
+    coverage: {
+      provider: 'v8',
+      reporter: ['text', 'html', 'json'],
+      reportOnFailure: true,
+    },
   },
 })

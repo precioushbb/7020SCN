@@ -10,7 +10,7 @@
     "lint": "eslint -c ./eslint.config.js \"./src*/**/*.{js,cjs,mjs,vue}\"",
     "format": "prettier --write \"**/*.{js,vue,scss,html,md,json}\" --ignore-path .gitignore",
     "test": "echo \"No test specified\" && exit 0",
-    "test:unit": "vitest run",
+    "test:vitest": "vitest run",
     "test:coverage": "vitest run --coverage",
     "dev": "quasar dev",
     "build": "quasar build",
