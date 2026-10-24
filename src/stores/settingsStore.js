@@ -14,12 +14,12 @@ async function hashPin(rawPin) {
 }
 
 export const useSettingsStore = defineStore('settings', () => {
-  const currency = ref('৳')
-  const currencyCode = ref('BDT')
-  const language = ref('bn')
+  const currency = ref('£')
+  const currencyCode = ref('GBP')
+  const language = ref('en')
   const fontFamily = ref('Tiro Bangla')
   const dateFormat = ref('DD MMM, YYYY')
-  const timezone = ref('Asia/Dhaka')
+  const timezone = ref('UK')
   const darkMode = ref(false)
   const appLock = ref(false)
   // PIN is stored internally as a SHA-256 hash and never exposed in the return object.

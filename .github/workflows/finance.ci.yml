@@ -1,0 +1,128 @@
+name: Finance App CI
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  quality:
+    name: Tests and build (report-only)
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: '10'
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Run unit tests
+        id: unit
+        continue-on-error: true
+        run: pnpm exec vitest run tests/unit --coverage
+
+      - name: Run integration tests
+        id: integration
+        continue-on-error: true
+        run: |
+          if [ -d tests/integration ] && find tests/integration -type f \( -name '*.spec.js' -o -name '*.test.js' \) | grep -q .; then
+            pnpm exec vitest run tests/integration
+          else
+            echo 'No integration test files found; skipping.'
+          fi
+
+      - name: Run ESLint
+        id: lint
+        continue-on-error: true
+        run: pnpm exec eslint -c ./eslint.config.js './src*/**/*.{js,mjs,cjs,vue}'
+
+      - name: Build Quasar SPA
+        id: build
+        continue-on-error: true
+        run: pnpm exec quasar build -m spa
+
+      - name: Upload Vitest coverage
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: vitest-coverage
+          path: coverage/
+          if-no-files-found: ignore
+          retention-days: 14
+
+      - name: Report quality results
+        if: always()
+        env:
+          UNIT: ${{ steps.unit.outcome }}
+          INTEGRATION: ${{ steps.integration.outcome }}
+          LINT: ${{ steps.lint.outcome }}
+          BUILD: ${{ steps.build.outcome }}
+        run: |
+          {
+            echo '## Finance app CI results (report-only)'
+            echo '| Check | Outcome |'
+            echo '|---|---|'
+            echo "| Unit tests | $UNIT |"
+            echo "| Integration tests | $INTEGRATION |"
+            echo "| ESLint | $LINT |"
+            echo "| Quasar SPA build | $BUILD |"
+            echo ''
+            echo 'Failures are reported but do not fail this job.'
+          } >> "$GITHUB_STEP_SUMMARY"
+
+  selenium:
+    name: Selenium browser tests (report-only)
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: '10'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: pnpm
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Start Quasar development server
+        id: server
+        continue-on-error: true
+        run: |
+          pnpm exec quasar dev -m spa --host 127.0.0.1 --port 9000 > /tmp/quasar-dev.log 2>&1 &
+          echo $! > /tmp/quasar-dev.pid
+          for i in $(seq 1 45); do
+            if curl -fsS http://127.0.0.1:9000/ > /dev/null; then exit 0; fi
+            sleep 2
+          done
+          cat /tmp/quasar-dev.log
+          exit 1
+
+      # Assumes Mocha-style Selenium tests in tests/e2e/*.spec.js.
+      # Adjust this command to match your actual Selenium test runner and filenames.
+      - name: Run Selenium E2E tests
+        id: e2e
+        if: steps.server.outcome == 'success'
+        continue-on-error: true
+        env:
+          CI: 'true'
+          BASE_URL: http://127.0.0.1:9000
+        run: |
+          if [ -d tests/e2e ] && find tests/e2e -type f \( -name '*.spec.js' -o -name '*.test.js' \) | grep -q .; then
+            pnpm exec mocha 'tests/e2e/**/*.spec.js' 'tests/e2e/**/*.test.js' --timeout 60000

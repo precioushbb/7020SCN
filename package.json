@@ -12,6 +12,7 @@
     "test": "echo \"No test specified\" && exit 0",
     "test:vitest": "vitest run",
     "test:coverage": "vitest run --coverage",
+    "test:e2e": "mocha \"tests/e2e/**/*.spec.js\" --timeout 30000",
     "dev": "quasar dev",
     "build": "quasar build",
     "postinstall": "quasar prepare"

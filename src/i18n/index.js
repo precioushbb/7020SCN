@@ -4,7 +4,7 @@ import bn from './bn.js'
 
 const i18n = createI18n({
   legacy: false,
-  locale: 'bn',
+  locale: 'en',
   fallbackLocale: 'en',
   messages: {
     en,
