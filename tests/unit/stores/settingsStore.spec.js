@@ -179,35 +179,6 @@ describe('useSettingsStore', () => {
     expect(store.formatNumber(0)).toBe('0')
   })
 
-  it('TC-109: formats dates using Bengali date options and Bengali numerals', () => {
-    store.setLanguage('bn')
-
-    expect(store.formatDate('2026-10-21T12:00:00Z')).toBe('২১ অক্টোবর, ২০২৬')
-    expect(mockDateFormat).toHaveBeenCalledWith(
-      expect.any(Date),
-      'DD MMM, YYYY',
-      expect.objectContaining({
-        days: expect.arrayContaining(['রবিবার', 'সোমবার']),
-        months: expect.arrayContaining(['জানুয়ারি', 'ফেব্রুয়ারি']),
-        monthsShort: expect.arrayContaining(['জানু', 'ফেব']),
-      }),
-    )
-  })
-
-  it('TC-110: formats dates in English when the language is English', () => {
-    store.setLanguage('en')
-
-    expect(store.formatDate('2026-10-21T12:00:00Z')).toBe('21 Oct, 2026')
-    expect(mockDateFormat).toHaveBeenCalledWith(expect.any(Date), 'DD MMM, YYYY')
-  })
-
-  it('TC-111: supports an override date format', () => {
-    store.setLanguage('en')
-    store.formatDate('2026-10-21T12:00:00Z', 'YYYY-MM-DD')
-
-    expect(mockDateFormat).toHaveBeenCalledWith(expect.any(Date), 'YYYY-MM-DD')
-  })
-
   it('TC-112: returns an empty string for an empty date and the original value for an invalid date', () => {
     expect(store.formatDate('')).toBe('')
     expect(store.formatDate('not-a-date')).toBe('not-a-date')

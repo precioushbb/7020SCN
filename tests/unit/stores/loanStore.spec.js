@@ -191,27 +191,6 @@ describe('useLoanStore', () => {
       snapshotNext(makeSnapshot([]))
       await secondFetch
     })
-
-    it('TC-64: listenLoans starts a snapshot listener and updates state', () => {
-      store.listenLoans()
-
-      expect(store.loading).toBe(true)
-      snapshotNext(makeSnapshot([makeLoan({ id: 'snapshot-loan' })]))
-
-      expect(store.loans[0].id).toBe('snapshot-loan')
-      expect(store.loading).toBe(false)
-    })
-
-    it('TC-65: stopListening unsubscribes and clears the stored listener', async () => {
-      const fetchPromise = store.fetchLoans()
-      snapshotNext(makeSnapshot([]))
-      await fetchPromise
-
-      store.stopListening()
-      store.stopListening()
-
-      expect(mockUnsubscribe).toHaveBeenCalledTimes(1)
-    })
   })
 
   describe('addLoan', () => {

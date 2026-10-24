@@ -23,30 +23,30 @@
         <div class='clearfix'>
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">100% </span>
+                <span class="strong">96% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>125/125</span>
+                <span class='fraction'>120/125</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">79.59% </span>
+                <span class="strong">67.34% </span>
                 <span class="quiet">Branches</span>
-                <span class='fraction'>39/49</span>
+                <span class='fraction'>33/49</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">100% </span>
+                <span class="strong">92% </span>
                 <span class="quiet">Functions</span>
-                <span class='fraction'>25/25</span>
+                <span class='fraction'>23/25</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">100% </span>
+                <span class="strong">97.24% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>109/109</span>
+                <span class='fraction'>106/109</span>
             </div>
         
             
@@ -429,7 +429,7 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">6x</span>
+<span class="cline-any cline-yes">5x</span>
 <span class="cline-any cline-yes">21x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -579,7 +579,7 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">3x</span>
-<span class="cline-any cline-yes">108x</span>
+<span class="cline-any cline-yes">3x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -629,11 +629,11 @@
 <span class="cline-any cline-yes">3x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">3x</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-yes">5x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -711,12 +711,12 @@ async function hashPin(rawPin) {
 }
 &nbsp;
 export const useSettingsStore = defineStore('settings', () =&gt; {
-  const currency = ref('৳')
-  const currencyCode = ref('BDT')
-  const language = ref('bn')
+  const currency = ref('£')
+  const currencyCode = ref('GBP')
+  const language = ref('en')
   const fontFamily = ref('Tiro Bangla')
   const dateFormat = ref('DD MMM, YYYY')
-  const timezone = ref('Asia/Dhaka')
+  const timezone = ref('UK')
   const darkMode = ref(false)
   const appLock = ref(false)
   // PIN is stored internally as a SHA-256 hash and never exposed in the return object.
@@ -895,7 +895,7 @@ export const useSettingsStore = defineStore('settings', () =&gt; {
 &nbsp;
     // Parse the formatted date parts and create a new date object
     const parts = formatter.formatToParts(dateObj)
-    const getPart = (type) =&gt; parts.find((p) =&gt; p.type === type)?.value || <span class="branch-1 cbranch-no" title="branch not covered" >'0'</span>
+    const getPart = <span class="fstat-no" title="function not covered" >(t</span>ype) =&gt; <span class="cstat-no" title="statement not covered" >parts.find(<span class="fstat-no" title="function not covered" >(p</span>) =&gt; <span class="cstat-no" title="statement not covered" >p.type === type)</span>?.value || '0'</span>
 &nbsp;
     // Create a new date using the timezone-adjusted values
     // This effectively shifts the date to display in the selected timezone
@@ -944,12 +944,12 @@ export const useSettingsStore = defineStore('settings', () =&gt; {
 &nbsp;
     let formatted = ''
 &nbsp;
-    if (language.value === 'bn') {
-      formatted = date.formatDate(dateObj, overrideFormat || dateFormat.value, bnOptions)
-      return toBengaliNumerals(formatted)
+    <span class="missing-if-branch" title="if path not taken" >I</span>if (language.value === 'bn') {
+<span class="cstat-no" title="statement not covered" >      formatted = date.formatDate(dateObj, overrideFormat || dateFormat.value, bnOptions)</span>
+<span class="cstat-no" title="statement not covered" >      return toBengaliNumerals(formatted)</span>
     }
 &nbsp;
-    formatted = date.formatDate(dateObj, overrideFormat || dateFormat.value)
+<span class="cstat-no" title="statement not covered" >    formatted = date.formatDate(dateObj, overrideFormat || dateFormat.value)</span>
     return formatted
   }
 &nbsp;
@@ -1018,7 +1018,7 @@ export const useSettingsStore = defineStore('settings', () =&gt; {
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2026-10-23T22:32:18.312Z
+                at 2026-10-24T20:54:47.135Z
             </div>
         <script src="../prettify.js"></script>
         <script>

@@ -95,6 +95,10 @@ function renderLogin() {
     global: {
       plugins: [pinia],
       components: { QForm },
+      stubs: {
+        'router-link': true,
+        RouterLink: true,
+      },
     },
   })
 
