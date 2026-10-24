@@ -36,6 +36,11 @@ jobs:
         continue-on-error: true
         run: pnpm exec vitest run tests/unit --coverage
 
+      - name: Run component tests
+        id: component
+        continue-on-error: true
+        run: pnpm exec vitest run tests/component --coverage
+
       - name: Run integration tests
         id: integration
         continue-on-error: true
@@ -78,6 +83,7 @@ jobs:
             echo '| Check | Outcome |'
             echo '|---|---|'
             echo "| Unit tests | $UNIT |"
+            echo "| Component tests | $COMPONENT |"
             echo "| Integration tests | $INTEGRATION |"
             echo "| ESLint | $LINT |"
             echo "| Quasar SPA build | $BUILD |"
