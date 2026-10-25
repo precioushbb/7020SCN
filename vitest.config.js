@@ -22,6 +22,8 @@ export default defineConfig({
     include: [
       'tests/unit/**/*.spec.js',
       'tests/unit/**/*.test.js',
+      'tests/component/**/*.spec.js',
+      'tests/component/**/*.test.js',
       'tests/integration/**/*.spec.js',
       'tests/integration/**/*.test.js',
     ],
