@@ -73,23 +73,53 @@ export const useAccountStore = defineStore('accounts', () => {
   async function updateBalance(accountId, amount) {
     const acc = accounts.value.find((a) => a.id === accountId)
     if (!acc) return
+
     const uid = auth.currentUser?.uid
     if (!uid) return
-    const accRef = doc(firestore, `users/${uid}/accounts/${accountId}`)
 
-    const currentBalance = Number(acc.balance || 0)
-    const amountToUpdate = Number(amount || 0)
+    // FIX UT-34: Validate the supplied amount
+    if (
+      amount === null ||
+      amount === undefined ||
+      typeof amount === 'boolean' ||
+      (typeof amount === 'string' && amount.trim() === '')
+    ) {
+      return
+    }
+
+    const amountToUpdate = Number(amount)
+    const currentBalance = Number(acc.balance)
+
+    if (!Number.isFinite(amountToUpdate) || !Number.isFinite(currentBalance)) {
+      console.warn('[Account] Invalid balance or amount')
+      return
+    }
+
     const newBalance = currentBalance + amountToUpdate
 
-    // Optimistically update pinia state immediately so UI reflects the change
+    if (!Number.isFinite(newBalance)) return
+
+    const accRef = doc(firestore, `users/${uid}/accounts/${accountId}`)
+
+    // Preserve original balance for rollback
+    const previousBalance = acc.balance
+
+    // Optimistically update the UI
     acc.balance = newBalance
 
-    // Fire-and-forget: persistentLocalCache queues offline writes automatically
-    updateDoc(accRef, { balance: newBalance }).catch((err) =>
-      console.warn('[Firestore] Balance update queued:', err),
-    )
-  }
+    try {
+      // FIX UT-33: Wait for Firestore to confirm the write
+      await updateDoc(accRef, { balance: newBalance })
+    } catch (err) {
+      // Restore the original balance only if another update
+      // has not already changed it
+      if (acc.balance === newBalance) {
+        acc.balance = previousBalance
+      }
 
+      console.warn('[Firestore] Balance update failed:', err)
+    }
+  }
   async function deleteAccount(id) {
     const uid = auth.currentUser?.uid
     if (!uid) return
