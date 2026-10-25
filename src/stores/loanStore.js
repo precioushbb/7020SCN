@@ -149,7 +149,6 @@ export const useLoanStore = defineStore('loans', () => {
       },
     )
   }
-
   async function addLoan(loan) {
     const loansRef = getUserLoansRef()
     if (!loansRef) return
@@ -175,14 +174,77 @@ export const useLoanStore = defineStore('loans', () => {
       .catch((err) => console.warn('[Firestore] Loan write queued:', err))
   }
 
+  // async function addPayment(loanId, payment) {
+  //   const uid = auth.currentUser?.uid
+  //   if (!uid) return
+  //   const loan = loans.value.find((l) => l.id === loanId)
+  //   if (!loan) return
+
+  //   const newPayment = {
+  //     amount: payment.amount,
+  //     date: payment.date || new Date().toISOString().slice(0, 10),
+  //     notes: payment.notes || '',
+  //     accountId: payment.accountId || null,
+  //     transactionId: payment.transactionId || null,
+  //     createdAt: Date.now(),
+  //   }
+
+  //   const newPaidAmount = (loan.paidAmount || 0) + payment.amount
+  //   const newPayments = [...(loan.payments || []), newPayment]
+  //   const settled = newPaidAmount >= loan.amount
+
+  //   // Optimistic update
+  //   loan.paidAmount = newPaidAmount
+  //   loan.payments = newPayments
+  //   loan.settled = settled
+
+  //   const loanRef = doc(firestore, `users/${uid}/loans/${loanId}`)
+  //   updateDoc(loanRef, {
+  //     paidAmount: newPaidAmount,
+  //     payments: newPayments,
+  //     settled,
+  //   }).catch((err) => console.warn('[Firestore] Payment update queued:', err))
+  // }
   async function addPayment(loanId, payment) {
     const uid = auth.currentUser?.uid
     if (!uid) return
+
     const loan = loans.value.find((l) => l.id === loanId)
     if (!loan) return
 
+    // FIX UT-55: Validate payment amount
+    const paymentAmount = Number(payment?.amount)
+
+    if (
+      payment?.amount === null ||
+      payment?.amount === undefined ||
+      typeof payment.amount === 'boolean' ||
+      (typeof payment.amount === 'string' && payment.amount.trim() === '') ||
+      !Number.isFinite(paymentAmount) ||
+      paymentAmount <= 0
+    ) {
+      console.warn('[Loan] Invalid payment amount')
+      return
+    }
+
+    const loanAmount = Number(loan.amount)
+    const currentPaidAmount = Number(loan.paidAmount || 0)
+
+    if (!Number.isFinite(loanAmount) || !Number.isFinite(currentPaidAmount)) {
+      console.warn('[Loan] Invalid loan balance')
+      return
+    }
+
+    // FIX UT-60: Prevent overpayment
+    const remainingBalance = loanAmount - currentPaidAmount
+
+    if (paymentAmount > remainingBalance) {
+      console.warn('[Loan] Payment exceeds outstanding balance')
+      return
+    }
+
     const newPayment = {
-      amount: payment.amount,
+      amount: paymentAmount,
       date: payment.date || new Date().toISOString().slice(0, 10),
       notes: payment.notes || '',
       accountId: payment.accountId || null,
@@ -190,9 +252,9 @@ export const useLoanStore = defineStore('loans', () => {
       createdAt: Date.now(),
     }
 
-    const newPaidAmount = (loan.paidAmount || 0) + payment.amount
+    const newPaidAmount = currentPaidAmount + paymentAmount
     const newPayments = [...(loan.payments || []), newPayment]
-    const settled = newPaidAmount >= loan.amount
+    const settled = newPaidAmount >= loanAmount
 
     // Optimistic update
     loan.paidAmount = newPaidAmount
@@ -206,7 +268,6 @@ export const useLoanStore = defineStore('loans', () => {
       settled,
     }).catch((err) => console.warn('[Firestore] Payment update queued:', err))
   }
-
   async function updatePayment(loanId, paymentIndex, updatedPayment) {
     const uid = auth.currentUser?.uid
     if (!uid) return

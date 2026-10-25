@@ -109,7 +109,7 @@ afterEach(() => {
 })
 
 describe('useAuthStore', () => {
-  it('TC-90: starts signed out and waits for Firebase authentication state', async () => {
+  it('UT-35: starts signed out and waits for Firebase authentication state', async () => {
     const store = await createStore()
 
     expect(store.user).toBeNull()
@@ -126,7 +126,7 @@ describe('useAuthStore', () => {
     expect(store.isAuthenticated).toBe(false)
   })
 
-  it('TC-REL-02: registration reports failure when essential provisioning fails', async () => {
+  it('UT-36: registration reports failure when essential provisioning fails', async () => {
     mocks.register.mockResolvedValue({
       user: firebaseUser,
     })
@@ -158,7 +158,7 @@ describe('useAuthStore', () => {
     expect(result.error).toBeDefined()
   })
 
-  it('TC-91: logs in, updates auth state and fetches the profile', async () => {
+  it('UT-37: logs in, updates auth state and fetches the profile', async () => {
     mocks.signIn.mockResolvedValue({
       user: firebaseUser,
     })
@@ -174,7 +174,7 @@ describe('useAuthStore', () => {
     expect(store.userProfile).toEqual(profile)
   })
 
-  it('TC-92: sanitises Firebase login errors', async () => {
+  it('UT-38: sanitises Firebase login errors', async () => {
     mocks.signIn.mockRejectedValue({
       code: 'auth/invalid-credential',
     })
@@ -190,7 +190,7 @@ describe('useAuthStore', () => {
     expect(result.error).not.toContain('auth/')
   })
 
-  it('TC-93: rejects profile updates while signed out', async () => {
+  it('UT-39: rejects profile updates while signed out', async () => {
     const store = await createStore()
 
     expect(
@@ -205,7 +205,7 @@ describe('useAuthStore', () => {
     expect(mocks.updateDoc).not.toHaveBeenCalled()
   })
 
-  it('TC-94: registers a user and completes essential provisioning', async () => {
+  it('UT-40: registers a user and completes essential provisioning', async () => {
     mocks.register.mockResolvedValue({
       user: firebaseUser,
     })
@@ -250,7 +250,7 @@ describe('useAuthStore', () => {
     expect(mocks.getDoc).toHaveBeenCalled()
   })
 
-  it('TC-95: logs out and clears authentication state', async () => {
+  it('UT-41: logs out and clears authentication state', async () => {
     const store = await createStore()
 
     authCallback(firebaseUser)
@@ -267,7 +267,7 @@ describe('useAuthStore', () => {
     expect(store.isAuthenticated).toBe(false)
   })
 
-  it('TC-96: rejects password changes when signed out', async () => {
+  it('UT-42: rejects password changes when signed out', async () => {
     const store = await createStore()
 
     expect(await store.changePassword('old', 'new')).toEqual({
