@@ -194,7 +194,16 @@ describe('fetchCategories', () => {
 
 describe('addCategory', () => {
   it('optimistically inserts defaults and persists the exact payload', async () => {
-    await store.addCategory({ type: 'expense', name: 'Other' })
+    let resolveAdd
+
+    // Keep Firebase pending to inspect the optimistic state
+    addMock.mockImplementation(
+      () =>
+        new Promise((resolve) => {
+          resolveAdd = resolve
+        }),
+    )
+
     const payload = {
       type: 'expense',
       name: 'Other',
@@ -202,11 +211,27 @@ describe('addCategory', () => {
       color: '#111111',
       budget: 0,
     }
+
+    // Trigger the store action
+    await store.addCategory({
+      type: 'expense',
+      name: 'Other',
+    })
+
+    // Verify optimistic insertion before Firebase responds
     expect(store.categories).toHaveLength(1)
     expect(store.categories[0]).toMatchObject(payload)
     expect(store.categories[0].id).toMatch(/^temp_/)
+
+    // Verify the Firestore payload
     expect(addMock).toHaveBeenCalledWith(collectionRef, payload)
+
+    // Simulate successful Firestore persistence
+    resolveAdd({ id: 'saved1' })
+
     await flush()
+
+    // Verify temporary ID was replaced with Firebase ID
     expect(store.categories[0].id).toBe('saved1')
   })
 

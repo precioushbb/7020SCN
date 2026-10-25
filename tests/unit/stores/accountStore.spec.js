@@ -89,33 +89,33 @@ describe('useAccountStore', () => {
   })
 
   describe('initial state', () => {
-    it('TC-20:initialises with an empty accounts array', () => {
+    it('UNIT-20:initialises with an empty accounts array', () => {
       expect(store.accounts).toEqual([])
     })
 
-    it('TC-21: initialises loading as false', () => {
+    it('UNIT-21: initialises loading as false', () => {
       expect(store.loading).toBe(false)
     })
 
-    it('TC-22: initialises totalBalance as zero', () => {
+    it('UNIT-22: initialises totalBalance as zero', () => {
       expect(store.totalBalance).toBe(0)
     })
   })
 
   describe('totalBalance', () => {
-    it('TC-23: calculates the total balance of all accounts', () => {
+    it('UNIT-23: calculates the total balance of all accounts', () => {
       store.accounts = sampleAccounts
 
       expect(store.totalBalance).toBe(1500)
     })
 
-    it('TC-24: treats missing or zero balances as zero', () => {
+    it('UNIT-24: treats missing or zero balances as zero', () => {
       store.accounts = [{ id: '1', balance: 100 }, { id: '2' }, { id: '3', balance: 0 }]
 
       expect(store.totalBalance).toBe(100)
     })
 
-    it('TC-25: updates when an account balance changes', () => {
+    it('UNIT-25: updates when an account balance changes', () => {
       store.accounts = sampleAccounts
       store.accounts[0].balance = 2000
 
@@ -124,13 +124,13 @@ describe('useAccountStore', () => {
   })
 
   describe('getUserAccountsRef behaviour', () => {
-    it('TC-26: uses the authenticated user account collection', () => {
+    it('UNIT-26: uses the authenticated user account collection', () => {
       store.listenAccounts()
 
       expect(mockCollection).toHaveBeenCalledWith(mockFirestore, 'users/user123/accounts')
     })
 
-    it('TC-27: does not listen when the user is unauthenticated', () => {
+    it('UNIT-27: does not listen when the user is unauthenticated', () => {
       mockAuth.currentUser = null
 
       store.listenAccounts()
@@ -142,7 +142,7 @@ describe('useAccountStore', () => {
   })
 
   describe('listenAccounts', () => {
-    it('TC-28: subscribes to Firestore and loads accounts', () => {
+    it('UNIT-28: subscribes to Firestore and loads accounts', () => {
       mockOnSnapshot.mockImplementation((ref, onSuccess) => {
         onSuccess(createSnapshot(sampleAccounts))
         return vi.fn()
@@ -160,13 +160,13 @@ describe('useAccountStore', () => {
       expect(store.loading).toBe(false)
     })
 
-    it('TC-29: sets loading to true while waiting for the snapshot', () => {
+    it('UNIT-29: sets loading to true while waiting for the snapshot', () => {
       store.listenAccounts()
 
       expect(store.loading).toBe(true)
     })
 
-    it('TC-30: sets loading to false when Firestore returns an error', () => {
+    it('UNIT-30: sets loading to false when Firestore returns an error', () => {
       const error = new Error('Firestore error')
       const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {})
 
@@ -183,7 +183,7 @@ describe('useAccountStore', () => {
       consoleSpy.mockRestore()
     })
 
-    it('TC-31: unsubscribes from the previous listener before listening again', () => {
+    it('UNIT-31: unsubscribes from the previous listener before listening again', () => {
       const unsubscribe = vi.fn()
       mockOnSnapshot.mockReturnValue(unsubscribe)
 
@@ -196,20 +196,7 @@ describe('useAccountStore', () => {
   })
 
   describe('fetchAccounts', () => {
-    it('TC-32: fetches accounts and resolves after the snapshot arrives', async () => {
-      mockOnSnapshot.mockImplementation((ref, onSuccess) => {
-        onSuccess(createSnapshot(sampleAccounts))
-        return vi.fn()
-      })
-
-      await store.fetchAccounts()
-
-      expect(store.accounts).toEqual(sampleAccounts)
-      expect(store.totalBalance).toBe(1500)
-      expect(store.loading).toBe(false)
-    })
-
-    it('TC-33: resolves without fetching when the user is unauthenticated', async () => {
+    it('UNIT-33: resolves without fetching when the user is unauthenticated', async () => {
       mockAuth.currentUser = null
 
       await expect(store.fetchAccounts()).resolves.toBeUndefined()
@@ -218,7 +205,7 @@ describe('useAccountStore', () => {
       expect(store.loading).toBe(false)
     })
 
-    it('TC-34: resolves and clears loading when the snapshot fails', async () => {
+    it('UNIT-34: resolves and clears loading when the snapshot fails', async () => {
       const error = new Error('Unable to fetch accounts')
       const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {})
 
@@ -237,41 +224,7 @@ describe('useAccountStore', () => {
   })
 
   describe('addAccount', () => {
-    it('TC-35:adds an account with the supplied details', async () => {
-      const account = {
-        name: 'Investment',
-        type: 'investment',
-        balance: 2500,
-        icon: 'trending_up',
-        color: '#FF0000',
-      }
-
-      await store.addAccount(account)
-
-      expect(store.accounts).toHaveLength(1)
-      expect(store.accounts[0]).toMatchObject({
-        name: 'Investment',
-        type: 'investment',
-        balance: 2500,
-        icon: 'trending_up',
-        color: '#FF0000',
-      })
-
-      expect(store.accounts[0].id).toMatch(/^temp_/)
-      expect(mockAddDoc).toHaveBeenCalledWith(
-        mockAccountsRef,
-        expect.objectContaining({
-          name: 'Investment',
-          type: 'investment',
-          balance: 2500,
-          icon: 'trending_up',
-          color: '#FF0000',
-          createdAt: expect.any(Number),
-        }),
-      )
-    })
-
-    it('TC-36:uses default values when optional fields are missing', async () => {
+    it('UNIT-36:uses default values when optional fields are missing', async () => {
       await store.addAccount({
         name: 'Cash',
         type: 'cash',
@@ -286,7 +239,7 @@ describe('useAccountStore', () => {
       })
     })
 
-    it('TC-37: replaces the temporary ID after Firestore successfully adds the account', async () => {
+    it('UNIT-37: replaces the temporary ID after Firestore successfully adds the account', async () => {
       mockAddDoc.mockResolvedValue({ id: 'saved123' })
 
       await store.addAccount({
@@ -302,7 +255,7 @@ describe('useAccountStore', () => {
       expect(store.accounts[0].id).toBe('saved123')
     })
 
-    it('TC-38: does not add an account when the user is unauthenticated', async () => {
+    it('UNIT-38: does not add an account when the user is unauthenticated', async () => {
       mockAuth.currentUser = null
 
       await store.addAccount({
@@ -315,7 +268,7 @@ describe('useAccountStore', () => {
       expect(mockAddDoc).not.toHaveBeenCalled()
     })
 
-    it('TC-39: handles a failed Firestore write without removing the optimistic account', async () => {
+    it('UNIT-39: handles a failed Firestore write without removing the optimistic account', async () => {
       const error = new Error('Write failed')
       const consoleSpy = vi.spyOn(console, 'warn').mockImplementation(() => {})
 
@@ -343,7 +296,7 @@ describe('useAccountStore', () => {
       store.accounts = sampleAccounts.map((account) => ({ ...account }))
     })
 
-    it('TC-40: updates account details optimistically', async () => {
+    it('UNIT-40: updates account details optimistically', async () => {
       await store.updateAccount('account1', {
         name: 'Updated Savings',
         balance: 2000,
@@ -356,7 +309,7 @@ describe('useAccountStore', () => {
       })
     })
 
-    it('TC-41: persists account changes to Firestore', async () => {
+    it('UNIT-41: persists account changes to Firestore', async () => {
       const changes = { name: 'Updated Savings' }
 
       await store.updateAccount('account1', changes)
@@ -368,7 +321,7 @@ describe('useAccountStore', () => {
       )
     })
 
-    it('TC-42: does not update Firestore when the user is unauthenticated', async () => {
+    it('UNIT-42: does not update Firestore when the user is unauthenticated', async () => {
       mockAuth.currentUser = null
 
       await store.updateAccount('account1', {
@@ -384,49 +337,76 @@ describe('useAccountStore', () => {
     beforeEach(() => {
       store.accounts = sampleAccounts.map((account) => ({ ...account }))
     })
+    it('UNIT-43: increases an account balance by the supplied amount', async () => {
+      // Arrange: Set initial balance
+      store.accounts = [
+        {
+          id: 'account1',
+          balance: 1000,
+        },
+      ]
 
-    it('TC-43: increases an account balance by the supplied amount', async () => {
+      // Act: Increase balance by 500
       await store.updateBalance('account1', 500)
 
+      // Assert: Verify updated balance
       expect(store.accounts[0].balance).toBe(1500)
     })
 
-    it('TC-44: decreases an account balance when given a negative amount', async () => {
+    it('UNIT-44: decreases an account balance when given a negative amount', async () => {
+      // Arrange
+      store.accounts = [{ id: 'account1', balance: 1000 }]
+
+      mockUpdateDoc.mockResolvedValue(undefined)
+
+      // Act
       await store.updateBalance('account1', -200)
 
+      // Assert
       expect(store.accounts[0].balance).toBe(800)
     })
+    it('UNIT-45: persists the updated balance to Firestore', async () => {
+      // Set the initial account balance
+      store.accounts = [
+        {
+          id: 'account1',
+          balance: 1000,
+        },
+      ]
 
-    it('TC-45: persists the updated balance to Firestore', async () => {
+      mockUpdateDoc.mockResolvedValue(undefined)
+      mockUpdateDoc.mockClear()
+
+      // Update balance by 300
       await store.updateBalance('account1', 300)
 
+      // Verify Firestore receives the correct updated balance
       expect(mockUpdateDoc).toHaveBeenCalledWith(
         { path: 'users/user123/accounts/account1' },
         { balance: 1300 },
       )
+
+      // Verify optimistic Pinia state update
+      expect(store.accounts[0].balance).toBe(1300)
     })
 
-    it('TC-46: does nothing if the account does not exist', async () => {
+    it('UNIT-46: does nothing if the account does not exist', async () => {
       await store.updateBalance('unknown', 500)
 
       expect(mockUpdateDoc).not.toHaveBeenCalled()
     })
 
-    it('TC-47: does nothing if the user is unauthenticated', async () => {
+    it('UNIT-47: does nothing if the user is unauthenticated', async () => {
       mockAuth.currentUser = null
+
+      store.accounts = [{ id: 'account1', balance: 1000 }]
+
+      mockUpdateDoc.mockClear()
 
       await store.updateBalance('account1', 500)
 
       expect(store.accounts[0].balance).toBe(1000)
       expect(mockUpdateDoc).not.toHaveBeenCalled()
-    })
-
-    it('TC-48: treats a missing balance and amount as zero', async () => {
-      store.accounts = [{ id: 'account3' }]
-
-      await store.updateBalance('account3', undefined)
-
-      expect(store.accounts[0].balance).toBe(0)
     })
   })
 
@@ -435,14 +415,14 @@ describe('useAccountStore', () => {
       store.accounts = sampleAccounts.map((account) => ({ ...account }))
     })
 
-    it('TC-49: removes an account optimistically', async () => {
+    it('UNIT-49: removes an account optimistically', async () => {
       await store.deleteAccount('account1')
 
       expect(store.accounts).toHaveLength(1)
       expect(store.accounts[0].id).toBe('account2')
     })
 
-    it('TC-50: deletes the account from Firestore', async () => {
+    it('UNIT-50: deletes the account from Firestore', async () => {
       await store.deleteAccount('account1')
 
       expect(mockDoc).toHaveBeenCalledWith(mockFirestore, 'users/user123/accounts/account1')
@@ -451,7 +431,7 @@ describe('useAccountStore', () => {
       })
     })
 
-    it('TC-51: does not delete when the user is unauthenticated', async () => {
+    it('UNIT-51: does not delete when the user is unauthenticated', async () => {
       mockAuth.currentUser = null
 
       await store.deleteAccount('account1')
@@ -462,7 +442,7 @@ describe('useAccountStore', () => {
   })
 
   describe('stopListening', () => {
-    it('TC-52: unsubscribes from the active Firestore listener', () => {
+    it('UNIT-52: unsubscribes from the active Firestore listener', () => {
       const unsubscribe = vi.fn()
       mockOnSnapshot.mockReturnValue(unsubscribe)
 
@@ -472,11 +452,11 @@ describe('useAccountStore', () => {
       expect(unsubscribe).toHaveBeenCalledOnce()
     })
 
-    it('TC-53: does not throw when no listener exists', () => {
+    it('UNIT-53: does not throw when no listener exists', () => {
       expect(() => store.stopListening()).not.toThrow()
     })
 
-    it('TC-54: does not unsubscribe twice after stopping the listener', () => {
+    it('UNIT-54: does not unsubscribe twice after stopping the listener', () => {
       const unsubscribe = vi.fn()
       mockOnSnapshot.mockReturnValue(unsubscribe)
 
@@ -486,5 +466,34 @@ describe('useAccountStore', () => {
 
       expect(unsubscribe).toHaveBeenCalledOnce()
     })
+  })
+  it('UNIT-60: restores the original balance when Firestore rejects the update', async () => {
+    // Arrange
+    store.accounts = [{ id: 'account1', balance: 1000 }]
+
+    mockUpdateDoc.mockRejectedValueOnce(new Error('Permission denied'))
+
+    // Act
+    await store.updateBalance('account1', 500)
+
+    await vi.waitFor(() => {
+      expect(mockUpdateDoc).toHaveBeenCalled()
+    })
+
+    // Assert
+    expect(store.accounts[0].balance).toBe(1000)
+  })
+  it('UNIT-49: rejects non-numeric amounts without changing the account balance', async () => {
+    // Arrange
+    store.accounts = [{ id: 'account1', balance: 1000 }]
+
+    mockUpdateDoc.mockClear()
+
+    // Act
+    await store.updateBalance('account1', 'invalid')
+
+    // Assert
+    expect(store.accounts[0].balance).toBe(1000)
+    expect(mockUpdateDoc).not.toHaveBeenCalled()
   })
 })

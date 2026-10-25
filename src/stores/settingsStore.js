@@ -19,7 +19,7 @@ export const useSettingsStore = defineStore('settings', () => {
   const language = ref('en')
   const fontFamily = ref('Tiro Bangla')
   const dateFormat = ref('DD MMM, YYYY')
-  const timezone = ref('UK')
+  const timezone = ref('Europe/London')
   const darkMode = ref(false)
   const appLock = ref(false)
   // PIN is stored internally as a SHA-256 hash and never exposed in the return object.

@@ -1,4 +1,4 @@
-name: Finance App CI
+name: My Finance CI
 
 on:
   push:
@@ -74,6 +74,7 @@ jobs:
         if: always()
         env:
           UNIT: ${{ steps.unit.outcome }}
+          COMPONENT: ${{ steps.component.outcome }}
           INTEGRATION: ${{ steps.integration.outcome }}
           LINT: ${{ steps.lint.outcome }}
           BUILD: ${{ steps.build.outcome }}

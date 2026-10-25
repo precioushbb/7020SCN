@@ -19,5 +19,13 @@ export default defineConfig({
       reporter: ['text', 'html', 'json'],
       reportOnFailure: true,
     },
+    include: [
+      'tests/unit/**/*.spec.js',
+      'tests/unit/**/*.test.js',
+      'tests/integration/**/*.spec.js',
+      'tests/integration/**/*.test.js',
+    ],
+
+    exclude: ['tests/e2e/**', 'node_modules/**', 'dist/**'],
   },
 })

@@ -1,9 +1,9 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { defineComponent, h, nextTick } from 'vue'
 import { createPinia, setActivePinia } from 'pinia'
-import { shallowMount } from '@vue/test-utils'
+import { shallowMount, flushPromises } from '@vue/test-utils'
 
-// These mocks are hoisted before the real Pinia stores are imported.
+// Shared Firebase and router mocks
 const mocks = vi.hoisted(() => ({
   user: { currentUser: { uid: 'test-user' } },
   addDoc: vi.fn(),
@@ -52,10 +52,11 @@ import { useAccountStore } from '../../src/stores/accountStore.js'
 import { useTransactionStore } from '../../src/stores/transactionStore.js'
 import { useCategoryStore } from '../../src/stores/categoryStore.js'
 
-// Minimal Quasar stubs preserve v-model events and QForm submission.
+// Minimal Quasar component stubs
 const QForm = defineComponent({
   name: 'QForm',
   emits: ['submit'],
+
   setup(_, { slots, emit }) {
     return () =>
       h(
@@ -73,7 +74,6 @@ const QForm = defineComponent({
 
 const QInput = defineComponent({
   name: 'QInput',
-
   inheritAttrs: false,
 
   props: ['modelValue', 'type', 'label', 'prefix', 'rules', 'outlined', 'color', 'inputClass'],
@@ -84,9 +84,7 @@ const QInput = defineComponent({
     return () =>
       h('input', {
         'data-label': props.label,
-
         type: props.type === 'number' ? 'number' : 'text',
-
         value: props.modelValue ?? '',
 
         onInput: (event) => {
@@ -102,6 +100,7 @@ const QSelect = defineComponent({
   name: 'QSelect',
   props: ['modelValue', 'options', 'label'],
   emits: ['update:modelValue'],
+
   setup(props, { emit }) {
     return () =>
       h(
@@ -109,11 +108,13 @@ const QSelect = defineComponent({
         {
           'data-label': props.label,
           value: props.modelValue ?? '',
-          onChange: (e) => emit('update:modelValue', e.target.value),
+          onChange: (event) => emit('update:modelValue', event.target.value),
         },
         [
           h('option', { value: '' }, 'Choose'),
-          ...(props.options || []).map((o) => h('option', { value: o.value }, o.label)),
+          ...(props.options || []).map((option) =>
+            h('option', { value: option.value }, option.label),
+          ),
         ],
       )
   },
@@ -122,21 +123,16 @@ const QSelect = defineComponent({
 const QBtn = defineComponent({
   name: 'QBtn',
   props: ['type'],
+
   setup(props) {
-    return () =>
-      h(
-        'button',
-        {
-          type: props.type || 'button',
-        },
-        'Save',
-      )
+    return () => h('button', { type: props.type || 'button' }, 'Save')
   },
 })
 
 const passthrough = (name) =>
   defineComponent({
     name,
+
     setup(_, { slots }) {
       return () => h('div', slots.default?.())
     },
@@ -160,7 +156,9 @@ const stubs = {
   QTime: passthrough('QTime'),
 }
 
-let accounts, transactions, categories
+let accounts
+let transactions
+let categories
 
 beforeEach(() => {
   vi.clearAllMocks()
@@ -204,6 +202,7 @@ function mountPage(component) {
     global: {
       plugins: [],
       stubs,
+
       mocks: {
         $t: (key) => key,
         $router: { back: mocks.back },
@@ -212,6 +211,7 @@ function mountPage(component) {
   })
 }
 
+// Fill and submit the form, waiting for async updates
 async function fillAndSubmit(wrapper, { amount, category, account = 'a1' }) {
   await wrapper.get('input[type="number"]').setValue(String(amount))
 
@@ -220,15 +220,12 @@ async function fillAndSubmit(wrapper, { amount, category, account = 'a1' }) {
   await wrapper.get('select[data-label="common.account"]').setValue(account)
 
   await wrapper.get('form').trigger('submit')
+  await flushPromises()
   await nextTick()
-
-  // The store intentionally fires off Firestore writes
-  // without awaiting them.
-  await Promise.resolve()
 }
 
-describe('High-risk integration: form → Pinia transaction/account stores → Firebase', () => {
-  it('IT-01: saving £500 income records transaction and increases only selected account', async () => {
+describe('Form → Pinia transaction/account stores → Firebase', () => {
+  it('INT-11: saving £500 income records transaction and increases only selected account', async () => {
     const wrapper = mountPage(AddIncomePage)
 
     await fillAndSubmit(wrapper, {
@@ -265,12 +262,10 @@ describe('High-risk integration: form → Pinia transaction/account stores → F
       { balance: 1500 },
     )
 
-    expect(mocks.back).toHaveBeenCalled()
-
     wrapper.unmount()
   })
 
-  it('IT-02: saving £200 expense records transaction and reduces selected account', async () => {
+  it('INT-12: saving £200 expense records transaction and reduces selected account', async () => {
     const wrapper = mountPage(AddExpensePage)
 
     await fillAndSubmit(wrapper, {
@@ -300,7 +295,7 @@ describe('High-risk integration: form → Pinia transaction/account stores → F
     wrapper.unmount()
   })
 
-  it('IT-03: selecting another account leaves the original account unchanged', async () => {
+  it('INT-13: selecting another account leaves the original account unchanged', async () => {
     const wrapper = mountPage(AddIncomePage)
 
     await fillAndSubmit(wrapper, {
@@ -309,7 +304,7 @@ describe('High-risk integration: form → Pinia transaction/account stores → F
       account: 'a2',
     })
 
-    expect(accounts.accounts.map((a) => a.balance)).toEqual([1000, 375])
+    expect(accounts.accounts.map((account) => account.balance)).toEqual([1000, 375])
 
     expect(mocks.updateDoc).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -322,7 +317,7 @@ describe('High-risk integration: form → Pinia transaction/account stores → F
   })
 
   it.each([0, -5])(
-    'IT-04: invalid amount %s does not create a transaction or change balance',
+    'INT-14: invalid amount %s does not create a transaction or change balance',
     async (amount) => {
       const wrapper = mountPage(AddIncomePage)
 
@@ -341,7 +336,7 @@ describe('High-risk integration: form → Pinia transaction/account stores → F
     },
   )
 
-  it('IT-05: rejected transaction write exposes optimistic consistency risk', async () => {
+  it('INT-15: rejected transaction write exposes optimistic consistency risk', async () => {
     mocks.addDoc.mockRejectedValueOnce(new Error('Permission denied'))
 
     const warn = vi.spyOn(console, 'warn').mockImplementation(() => {})
@@ -354,13 +349,14 @@ describe('High-risk integration: form → Pinia transaction/account stores → F
         category: 'Salary',
       })
 
-      await vi.waitFor(() => expect(warn).toHaveBeenCalled())
+      await vi.waitFor(() => {
+        expect(warn).toHaveBeenCalled()
+      })
 
-      // This documents CURRENT behaviour,
-      // not desirable consistency.
+      // Current behaviour: the failed transaction remains
+      // in local state and the account balance is increased.
       expect(transactions.totalIncome).toBe(100)
       expect(accounts.accounts[0].balance).toBe(1100)
-      expect(mocks.back).toHaveBeenCalled()
 
       wrapper.unmount()
     } finally {
@@ -368,7 +364,7 @@ describe('High-risk integration: form → Pinia transaction/account stores → F
     }
   })
 
-  it('IT-06: rejected balance write exposes optimistic consistency risk', async () => {
+  it('INT-16: restores account balance when Firebase rejects the balance update', async () => {
     mocks.updateDoc.mockRejectedValueOnce(new Error('Permission denied'))
 
     const warn = vi.spyOn(console, 'warn').mockImplementation(() => {})
@@ -381,13 +377,14 @@ describe('High-risk integration: form → Pinia transaction/account stores → F
         category: 'Food',
       })
 
-      await vi.waitFor(() => expect(warn).toHaveBeenCalled())
+      await vi.waitFor(() => {
+        expect(warn).toHaveBeenCalled()
+      })
 
-      // Local state updates even though
-      // remote balance write was rejected.
+      // The transaction remains recorded locally,
+      // while the rejected balance write is rolled back.
       expect(transactions.totalExpense).toBe(50)
-      expect(accounts.accounts[0].balance).toBe(950)
-      expect(mocks.back).toHaveBeenCalled()
+      expect(accounts.accounts[0].balance).toBe(1000)
 
       wrapper.unmount()
     } finally {

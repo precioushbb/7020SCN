@@ -13,7 +13,7 @@ vi.mock('quasar', () => ({
   date: { formatDate: mockDateFormat },
 }))
 
-vi.mock('src/i18n', () => ({
+vi.mock('/src/i18n', () => ({
   default: {
     global: {
       locale: mockLocale,
@@ -51,15 +51,16 @@ describe('useSettingsStore', () => {
   })
 
   it('TC-100: initialises the default settings', () => {
-    expect(store.currency).toBe('৳')
-    expect(store.currencyCode).toBe('BDT')
-    expect(store.language).toBe('bn')
+    expect(store.currency).toBe('£')
+    expect(store.currencyCode).toBe('GBP')
+    expect(store.language).toBe('en')
     expect(store.fontFamily).toBe('Tiro Bangla')
     expect(store.dateFormat).toBe('DD MMM, YYYY')
-    expect(store.timezone).toBe('Asia/Dhaka')
+    expect(store.timezone).toBe('Europe/London')
     expect(store.darkMode).toBe(false)
     expect(store.appLock).toBe(false)
     expect(store.isAuthenticated).toBe(false)
+
     expect(store.balanceEmojis.negative.emoji).toBe('😭')
     expect(store.balanceEmojis.low.emoji).toBe('😟')
     expect(store.balanceEmojis.high.emoji).toBe('🤩')
@@ -107,7 +108,7 @@ describe('useSettingsStore', () => {
       store = useSettingsStore()
     }).not.toThrow()
 
-    expect(store.currency).toBe('৳')
+    expect(store.currency).toBe('£')
   })
 
   it('TC-103: saves setting changes to localStorage', () => {

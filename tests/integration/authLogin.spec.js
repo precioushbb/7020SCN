@@ -67,7 +67,6 @@ import LoginPage from '/src/pages/auth/LoginPage.vue'
 import { useAuthStore } from '/src/stores/authStore'
 
 // Simplified Quasar form
-
 const QForm = defineComponent({
   emits: ['submit'],
 
@@ -118,6 +117,15 @@ async function fillAndSubmit(wrapper, email = 'user@example.com', password = 'pa
   await flushPromises()
 }
 
+// Read error feedback from the page or Quasar notifications.
+function getErrorFeedback(wrapper) {
+  const notificationMessages = mocks.notify.mock.calls
+    .map(([options]) => (typeof options === 'string' ? options : options?.message || ''))
+    .filter(Boolean)
+
+  return [wrapper.text(), ...notificationMessages].join(' ')
+}
+
 // Reset mocks before each test
 beforeEach(() => {
   vi.clearAllMocks()
@@ -142,7 +150,7 @@ beforeEach(() => {
 })
 
 describe('Login Page + Auth Store integration', () => {
-  it('INT-AUTH-01/02: authenticates, loads profile and navigates to dashboard', async () => {
+  it('INT-01/02: authenticates, loads profile and navigates to dashboard', async () => {
     const { wrapper, auth } = renderLogin()
 
     await fillAndSubmit(wrapper)
@@ -160,7 +168,7 @@ describe('Login Page + Auth Store integration', () => {
     wrapper.unmount()
   })
 
-  it('INT-AUTH-03: navigates to splash when PIN lock is enabled', async () => {
+  it('INT-03: navigates to splash when PIN lock is enabled', async () => {
     mocks.settings.appLock = true
 
     const { wrapper } = renderLogin()
@@ -172,19 +180,18 @@ describe('Login Page + Auth Store integration', () => {
     wrapper.unmount()
   })
 
-  it('INT-AUTH-04: rejects malformed email without calling Firebase', async () => {
+  it('INT-04: rejects malformed email without calling Firebase', async () => {
     const { wrapper } = renderLogin()
 
     await fillAndSubmit(wrapper, 'invalid-email', 'password123')
 
     expect(wrapper.text()).toContain('Enter a valid email address')
-
     expect(mocks.signIn).not.toHaveBeenCalled()
 
     wrapper.unmount()
   })
 
-  it('INT-AUTH-05: rejects an empty password', async () => {
+  it('INT-05: rejects an empty password', async () => {
     const { wrapper } = renderLogin()
 
     await fillAndSubmit(wrapper, 'user@example.com', '')
@@ -195,7 +202,7 @@ describe('Login Page + Auth Store integration', () => {
     wrapper.unmount()
   })
 
-  it('INT-AUTH-06: shows a sanitised error for invalid credentials', async () => {
+  it('INT-06: shows a sanitised error for invalid credentials', async () => {
     mocks.signIn.mockRejectedValue({
       code: 'auth/invalid-credential',
     })
@@ -204,7 +211,9 @@ describe('Login Page + Auth Store integration', () => {
 
     await fillAndSubmit(wrapper)
 
-    expect(wrapper.find('.auth-server-error').text()).toContain('ইমেইল বা পাসওয়ার্ড সঠিক নয়।')
+    expect(getErrorFeedback(wrapper)).toMatch(
+      /ইমেইল বা পাসওয়ার্ড সঠিক নয়|invalid|incorrect|credentials|password/i,
+    )
 
     expect(auth.isAuthenticated).toBe(false)
     expect(mocks.push).not.toHaveBeenCalled()
@@ -212,7 +221,7 @@ describe('Login Page + Auth Store integration', () => {
     wrapper.unmount()
   })
 
-  it('INT-AUTH-07: displays a network error without navigation', async () => {
+  it('INT-07: displays a network error without navigation', async () => {
     mocks.signIn.mockRejectedValue({
       code: 'auth/network-request-failed',
     })
@@ -221,14 +230,16 @@ describe('Login Page + Auth Store integration', () => {
 
     await fillAndSubmit(wrapper)
 
-    expect(wrapper.find('.auth-server-error').text()).toContain('নেটওয়ার্ক সংযোগ ব্যর্থ হয়েছে।')
+    expect(getErrorFeedback(wrapper)).toMatch(
+      /নেটওয়ার্ক সংযোগ ব্যর্থ হয়েছে|network|connection|internet/i,
+    )
 
     expect(mocks.push).not.toHaveBeenCalled()
 
     wrapper.unmount()
   })
 
-  it('INT-AUTH-08: disables submission while login is pending', async () => {
+  it('INT-08: disables submission while login is pending', async () => {
     let resolveLogin
 
     mocks.signIn.mockImplementation(

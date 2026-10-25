@@ -22,7 +22,7 @@ const {
   mockFirestore: { name: 'mock-firestore' },
 }))
 
-vi.mock('/node_modules/firebase/firestore', () => ({
+vi.mock('firebase/firestore', () => ({
   collection: mockCollection,
   doc: mockDoc,
   onSnapshot: mockOnSnapshot,
@@ -30,8 +30,7 @@ vi.mock('/node_modules/firebase/firestore', () => ({
   updateDoc: mockUpdateDoc,
   deleteDoc: mockDeleteDoc,
 }))
-
-vi.mock('boot/firebase', () => ({
+vi.mock('/src/boot/firebase', () => ({
   firestore: mockFirestore,
   auth: mockAuth,
 }))
@@ -252,7 +251,27 @@ describe('useLoanStore', () => {
     beforeEach(() => {
       store.loans = [makeLoan({ id: 'loan-1', amount: 1000, paidAmount: 200, payments: [] })]
     })
+    it('TC-84: rejects negative loan payments', async () => {
+      // Arrange
+      store.loans = [
+        makeLoan({
+          id: 'loan-1',
+          amount: 1000,
+          paidAmount: 200,
+          payments: [],
+        }),
+      ]
 
+      // Act
+      await store.addPayment('loan-1', {
+        amount: -100,
+      })
+
+      // Assert
+      expect(store.loans[0].paidAmount).toBe(200)
+      expect(store.loans[0].payments).toHaveLength(0)
+      expect(mockUpdateDoc).not.toHaveBeenCalled()
+    })
     it('TC-69: adds a payment and marks the loan settled when fully paid', async () => {
       await store.addPayment('loan-1', {
         amount: 800,
@@ -303,6 +322,29 @@ describe('useLoanStore', () => {
       await store.updatePayment('missing', 0, { amount: 50 })
       await store.deletePayment('missing', 0)
 
+      expect(mockUpdateDoc).not.toHaveBeenCalled()
+    })
+    it('TC-85: prevents payments exceeding the outstanding loan balance', async () => {
+      // Arrange
+      store.loans = [
+        makeLoan({
+          id: 'loan-1',
+          amount: 1000,
+          paidAmount: 800,
+          payments: [{ amount: 800 }],
+          settled: false,
+        }),
+      ]
+
+      // Act
+      await store.addPayment('loan-1', {
+        amount: 500,
+      })
+
+      // Assert
+      expect(store.loans[0].paidAmount).toBe(800)
+      expect(store.loans[0].payments).toHaveLength(1)
+      expect(store.loans[0].settled).toBe(false)
       expect(mockUpdateDoc).not.toHaveBeenCalled()
     })
 
@@ -438,16 +480,73 @@ describe('useLoanStore', () => {
     })
 
     it('TC-79: records a partial installment payment without marking it paid', async () => {
-      await store.addInstallmentPayment('installment-loan', 0, { amount: 20, date: '2026-10-05' })
-
+      // Arrange
       const loan = store.loans[0]
+
+      expect(loan.id).toBe('installment-loan')
+      expect(loan.installments[0].paidAmount).toBe(0)
+
+      // Act
+      await store.addInstallmentPayment('installment-loan', 0, { amount: 20 }, false)
+
+      // Assert
       expect(loan.installments[0].paidAmount).toBe(20)
       expect(loan.installments[0].paid).toBe(false)
       expect(loan.paidAmount).toBe(20)
-      expect(loan.settled).toBe(false)
-      expect(mockUpdateDoc).toHaveBeenCalled()
-    })
 
+      expect(mockUpdateDoc).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.objectContaining({
+          paidAmount: 20,
+          settled: false,
+        }),
+      )
+    })
+    it('TC-86: recalculates remaining installments after a partial payment', async () => {
+      // Arrange
+      store.loans = [
+        makeLoan({
+          id: 'installment-loan',
+          type: 'loan',
+          amount: 100,
+          interestRate: 0,
+          totalAmount: 100,
+          paidAmount: 0,
+          settled: false,
+          installments: [
+            {
+              number: 1,
+              amount: 50,
+              paidAmount: 0,
+              paid: false,
+              payments: [],
+            },
+            {
+              number: 2,
+              amount: 50,
+              paidAmount: 0,
+              paid: false,
+              payments: [],
+            },
+          ],
+        }),
+      ]
+
+      // Act
+      await store.addInstallmentPayment('installment-loan', 0, { amount: 20 }, false)
+
+      const loan = store.loans[0]
+
+      // Remaining amount across installments
+      const remainingAmount = loan.installments.reduce(
+        (sum, inst) => sum + (inst.amount - inst.paidAmount),
+        0,
+      )
+
+      // Assert
+      expect(loan.paidAmount).toBe(20)
+      expect(remainingAmount).toBe(80)
+    })
     it('TC-80: marks an installment paid when cumulative payments reach its amount', async () => {
       await store.addInstallmentPayment('installment-loan', 0, { amount: 50, date: '2026-10-05' })
 
