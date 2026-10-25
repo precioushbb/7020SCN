@@ -101,7 +101,76 @@ export const useAuthStore = defineStore('auth', () => {
       userProfile.value = null
     }
   }
+  async function _setupNewUserData(uid, email) {
+    try {
+      await setDoc(doc(firestore, 'users', uid), {
+        uid,
+        name: '',
+        avatar: null,
+        email,
+        createdAt: new Date().toISOString(),
+      })
 
+      const accountsRef = collection(firestore, `users/${uid}/accounts`)
+
+      await Promise.all([
+        addDoc(accountsRef, {
+          name: 'Cash',
+          type: 'Cash',
+          balance: 0,
+          icon: 'wallet',
+          color: '#111111',
+          createdAt: Date.now(),
+        }),
+        addDoc(accountsRef, {
+          name: 'Bank',
+          type: 'Bank',
+          balance: 0,
+          icon: 'account_balance',
+          color: '#111111',
+          createdAt: Date.now(),
+        }),
+      ])
+
+      const categoriesRef = collection(firestore, `users/${uid}/categories`)
+
+      const defaultCategories = [
+        { type: 'expense', name: 'Groceries', icon: 'shopping_cart', color: '#f44336' },
+        { type: 'expense', name: 'Restaurant', icon: 'restaurant', color: '#ff9800' },
+        { type: 'expense', name: 'Transport', icon: 'directions_bus', color: '#2196f3' },
+        { type: 'expense', name: 'Health', icon: 'local_hospital', color: '#e91e63' },
+        { type: 'expense', name: 'Gifts', icon: 'card_giftcard', color: '#9c27b0' },
+        { type: 'expense', name: 'Family', icon: 'family_restroom', color: '#4caf50' },
+        { type: 'expense', name: 'Shopping', icon: 'shopping_bag', color: '#3f51b5' },
+        { type: 'income', name: 'Salary', icon: 'attach_money', color: '#4caf50' },
+      ]
+
+      await Promise.all(
+        defaultCategories.map((cat) =>
+          addDoc(categoriesRef, {
+            type: cat.type,
+            name: cat.name,
+            icon: cat.icon,
+            color: cat.color,
+            budget: 0,
+          }),
+        ),
+      )
+
+      await fetchUserProfile(uid)
+
+      // FIX UT-40: Report successful provisioning
+      return { success: true }
+    } catch (error) {
+      console.error('Error setting up new user data:', error)
+
+      // FIX UT-36: Report failed provisioning
+      return {
+        success: false,
+        error: error.message,
+      }
+    }
+  }
   async function updateUserProfile(updates) {
     if (!user.value) return { success: false, error: 'Not authenticated' }
 
@@ -162,76 +231,85 @@ export const useAuthStore = defineStore('auth', () => {
   async function register(email, password) {
     try {
       const userCredential = await createUserWithEmailAndPassword(auth, email, password)
+
       user.value = userCredential.user
       isAuthenticated.value = true
 
-      // Run Firestore setup in background — do not block registration redirect
-      _setupNewUserData(userCredential.user.uid, email)
+      const provisioningResult = await _setupNewUserData(userCredential.user.uid, email)
+
+      if (!provisioningResult.success) {
+        return {
+          success: false,
+          error: provisioningResult.error,
+        }
+      }
 
       return { success: true }
     } catch (error) {
-      return { success: false, error: sanitizeAuthError(error) }
+      return {
+        success: false,
+        error: sanitizeAuthError(error),
+      }
     }
   }
+  // async function _setupNewUserData(uid, email) {
+  //   try {
+  //     await setDoc(doc(firestore, 'users', uid), {
+  //       uid,
+  //       name: '',
+  //       avatar: null,
+  //       email,
+  //       createdAt: new Date().toISOString(),
+  //     })
 
-  async function _setupNewUserData(uid, email) {
-    try {
-      await setDoc(doc(firestore, 'users', uid), {
-        uid,
-        name: '',
-        avatar: null,
-        email,
-        createdAt: new Date().toISOString(),
-      })
+  //     const accountsRef = collection(firestore, `users/${uid}/accounts`)
+  //     await Promise.all([
+  //       addDoc(accountsRef, {
+  //         name: 'Cash',
+  //         type: 'Cash',
+  //         balance: 0,
+  //         icon: 'wallet',
+  //         color: '#111111',
+  //         createdAt: Date.now(),
+  //       }),
+  //       addDoc(accountsRef, {
+  //         name: 'Bank',
+  //         type: 'Bank',
+  //         balance: 0,
+  //         icon: 'account_balance',
+  //         color: '#111111',
+  //         createdAt: Date.now(),
+  //       }),
+  //     ])
 
-      const accountsRef = collection(firestore, `users/${uid}/accounts`)
-      await Promise.all([
-        addDoc(accountsRef, {
-          name: 'Cash',
-          type: 'Cash',
-          balance: 0,
-          icon: 'wallet',
-          color: '#111111',
-          createdAt: Date.now(),
-        }),
-        addDoc(accountsRef, {
-          name: 'Bank',
-          type: 'Bank',
-          balance: 0,
-          icon: 'account_balance',
-          color: '#111111',
-          createdAt: Date.now(),
-        }),
-      ])
+  //     const categoriesRef = collection(firestore, `users/${uid}/categories`)
+  //     const defaultCategories = [
+  //       { type: 'expense', name: 'Groceries', icon: 'shopping_cart', color: '#f44336' },
+  //       { type: 'expense', name: 'Restaurant', icon: 'restaurant', color: '#ff9800' },
+  //       { type: 'expense', name: 'Transport', icon: 'directions_bus', color: '#2196f3' },
+  //       { type: 'expense', name: 'Health', icon: 'local_hospital', color: '#e91e63' },
+  //       { type: 'expense', name: 'Gifts', icon: 'card_giftcard', color: '#9c27b0' },
+  //       { type: 'expense', name: 'Family', icon: 'family_restroom', color: '#4caf50' },
+  //       { type: 'expense', name: 'Shopping', icon: 'shopping_bag', color: '#3f51b5' },
+  //       { type: 'income', name: 'Salary', icon: 'attach_money', color: '#4caf50' },
+  //     ]
+  //     await Promise.all(
+  //       defaultCategories.map((cat) =>
+  //         addDoc(categoriesRef, {
+  //           type: cat.type,
+  //           name: cat.name,
+  //           icon: cat.icon,
+  //           color: cat.color,
+  //           budget: 0,
+  //         }),
+  //       ),
+  //     )
 
-      const categoriesRef = collection(firestore, `users/${uid}/categories`)
-      const defaultCategories = [
-        { type: 'expense', name: 'Groceries', icon: 'shopping_cart', color: '#f44336' },
-        { type: 'expense', name: 'Restaurant', icon: 'restaurant', color: '#ff9800' },
-        { type: 'expense', name: 'Transport', icon: 'directions_bus', color: '#2196f3' },
-        { type: 'expense', name: 'Health', icon: 'local_hospital', color: '#e91e63' },
-        { type: 'expense', name: 'Gifts', icon: 'card_giftcard', color: '#9c27b0' },
-        { type: 'expense', name: 'Family', icon: 'family_restroom', color: '#4caf50' },
-        { type: 'expense', name: 'Shopping', icon: 'shopping_bag', color: '#3f51b5' },
-        { type: 'income', name: 'Salary', icon: 'attach_money', color: '#4caf50' },
-      ]
-      await Promise.all(
-        defaultCategories.map((cat) =>
-          addDoc(categoriesRef, {
-            type: cat.type,
-            name: cat.name,
-            icon: cat.icon,
-            color: cat.color,
-            budget: 0,
-          }),
-        ),
-      )
-
-      await fetchUserProfile(uid)
-    } catch (error) {
-      console.error('Error setting up new user data:', error)
-    }
-  }
+  //     await fetchUserProfile(uid)
+  //   } catch (error) {
+  //     console.error('Error setting up new user data:', error)
+  //   }
+  // }
 
   async function logout() {
     try {
