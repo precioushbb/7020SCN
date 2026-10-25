@@ -17,50 +17,83 @@ jobs:
     name: Quality checks and production build
     runs-on: ubuntu-latest
     timeout-minutes: 25
+
     steps:
+      # 1. Checkout repository
       - name: Check out repository
         uses: actions/checkout@v4
+
+      # 2. Set up pnpm
       - name: Set up pnpm
         uses: pnpm/action-setup@v4
         with:
           version: '10'
+
+      # 3. Set up Node.js
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '22'
           cache: pnpm
+
+      # 4. Install dependencies
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
+      # 5. Run unit tests
       - name: Run unit tests
         id: unit
         continue-on-error: true
         run: pnpm exec vitest run tests/unit
+
+      # 6. Run component tests
       - name: Run component tests
         id: component
         continue-on-error: true
         run: pnpm exec vitest run tests/component
+
+      # 7. Run integration tests
       - name: Run integration tests
         id: integration
         continue-on-error: true
         run: |
-          if [ -d tests/integration ] && find tests/integration -type f \( -name '*.spec.js' -o -name '*.test.js' \) | grep -q .; then
+          if [ -d tests/integration ] && \
+             find tests/integration -type f \
+             \( -name '*.spec.js' -o -name '*.test.js' \) \
+             | grep -q .; then
             pnpm exec vitest run tests/integration
           else
-            echo 'No integration test files found; skipping.'
+            echo 'No integration test files found.'
+            echo 'Skipping integration tests.'
           fi
+
+      # 8. Generate combined coverage
       - name: Generate combined coverage report
         id: coverage
         continue-on-error: true
-        run: pnpm exec vitest run tests/unit tests/component tests/integration --coverage
+        run: |
+          pnpm exec vitest run \
+            tests/unit \
+            tests/component \
+            tests/integration \
+            --coverage
+
+      # 9. Run ESLint
       - name: Run ESLint
         id: lint
         continue-on-error: true
-        run: pnpm exec eslint -c ./eslint.config.js 'src/**/*.{js,mjs,cjs,vue}'
+        run: |
+          pnpm exec eslint \
+            -c ./eslint.config.js \
+            'src/**/*.{js,mjs,cjs,vue}'
+
+      # 10. Build Quasar SPA
       - name: Build Quasar SPA
         id: build
         continue-on-error: true
         run: pnpm exec quasar build -m spa
+
+      # 11. Upload coverage report
       - name: Upload combined Vitest coverage
         if: always()
         uses: actions/upload-artifact@v4
@@ -69,6 +102,8 @@ jobs:
           path: coverage/
           if-no-files-found: ignore
           retention-days: 14
+
+      # 12. Upload production build
       - name: Upload production SPA build
         if: steps.build.outcome == 'success'
         uses: actions/upload-artifact@v4
@@ -77,6 +112,8 @@ jobs:
           path: dist/spa/
           if-no-files-found: error
           retention-days: 14
+
+      # 13. Report quality results
       - name: Report quality results
         if: always()
         env:
@@ -88,9 +125,42 @@ jobs:
           BUILD: ${{ steps.build.outcome }}
         run: |
           {
-            echo '## Finance app quality results (report-only)'
-            echo '| Check | Outcome |'
+            echo '## My Finance CI Quality Results'
+            echo ''
+            echo '| Quality check | Outcome |'
             echo '|---|---|'
             echo "| Unit tests | $UNIT |"
             echo "| Component tests | $COMPONENT |"
             echo "| Integration tests | $INTEGRATION |"
+            echo "| Combined coverage | $COVERAGE |"
+            echo "| ESLint | $LINT |"
+            echo "| Production build | $BUILD |"
+            echo ''
+            echo '### Quality Gate'
+            echo 'All required checks must pass.'
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      # 14. Enforce quality gate
+      - name: Enforce quality gate
+        if: always()
+        env:
+          UNIT: ${{ steps.unit.outcome }}
+          COMPONENT: ${{ steps.component.outcome }}
+          INTEGRATION: ${{ steps.integration.outcome }}
+          COVERAGE: ${{ steps.coverage.outcome }}
+          LINT: ${{ steps.lint.outcome }}
+          BUILD: ${{ steps.build.outcome }}
+        run: |
+          if [[ "$UNIT" != "success" ||
+                "$COMPONENT" != "success" ||
+                "$INTEGRATION" != "success" ||
+                "$COVERAGE" != "success" ||
+                "$LINT" != "success" ||
+                "$BUILD" != "success" ]]; then
+            echo "Quality gate FAILED."
+            echo "One or more quality checks failed."
+            exit 1
+          fi
+
+          echo "Quality gate PASSED."
+          echo "All quality checks completed successfully."
