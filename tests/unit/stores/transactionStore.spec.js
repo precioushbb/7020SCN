@@ -58,7 +58,7 @@ describe('useTransactionStore', () => {
     vi.restoreAllMocks()
   })
 
-  it('TC-01: starts with empty transactions and zero totals', () => {
+  it('UT-73: starts with empty transactions and zero totals', () => {
     expect(store.transactions).toEqual([])
     expect(store.loading).toBe(false)
     expect(store.totalIncome).toBe(0)
@@ -66,7 +66,7 @@ describe('useTransactionStore', () => {
     expect(store.recentTransactions).toEqual([])
   })
 
-  it('TC-02: does not start a listener when the user is signed out', () => {
+  it('UT-74: does not start a listener when the user is signed out', () => {
     mockAuth.currentUser = null
 
     store.listenTransactions()
@@ -75,7 +75,7 @@ describe('useTransactionStore', () => {
     expect(mockOnSnapshot).not.toHaveBeenCalled()
   })
 
-  it('TC-03: listens to the current user transactions and sorts newest first', () => {
+  it('UT-75: listens to the current user transactions and sorts newest first', () => {
     store.listenTransactions()
 
     expect(mockCollection).toHaveBeenCalledWith(mockFirestore, 'users/user-123/transactions')
@@ -93,7 +93,7 @@ describe('useTransactionStore', () => {
     expect(store.loading).toBe(false)
   })
 
-  it('TC-04: logs listener errors and clears loading', () => {
+  it('UT-76: logs listener errors and clears loading', () => {
     const consoleError = vi.spyOn(console, 'error').mockImplementation(() => {})
     const error = new Error('snapshot failed')
 
@@ -104,7 +104,7 @@ describe('useTransactionStore', () => {
     expect(store.loading).toBe(false)
   })
 
-  it('TC-05: unsubscribes from the previous listener before listening again', () => {
+  it('UT-77: unsubscribes from the previous listener before listening again', () => {
     store.listenTransactions()
     store.listenTransactions()
 
@@ -112,7 +112,7 @@ describe('useTransactionStore', () => {
     expect(mockOnSnapshot).toHaveBeenCalledTimes(2)
   })
 
-  it('TC-06: calculates total income and expenses', () => {
+  it('UT-78: calculates total income and expenses', () => {
     store.transactions = [
       { id: '1', type: 'income', amount: 1000 },
       { id: '2', type: 'expense', amount: 250 },
@@ -125,7 +125,7 @@ describe('useTransactionStore', () => {
     expect(store.totalExpense).toBe(300)
   })
 
-  it('TC-07: treats missing amounts as zero in totals', () => {
+  it('UT-79: treats missing amounts as zero in totals', () => {
     store.transactions = [
       { id: '1', type: 'income' },
       { id: '2', type: 'expense', amount: null },
@@ -135,7 +135,7 @@ describe('useTransactionStore', () => {
     expect(store.totalExpense).toBe(0)
   })
 
-  it('TC-08: returns at most ten recent non-transfer transactions', () => {
+  it('UT-80: returns at most ten recent non-transfer transactions', () => {
     store.transactions = Array.from({ length: 12 }, (_, index) => ({
       id: `tx-${index}`,
       type: index === 10 ? 'transfer' : 'expense',
@@ -148,7 +148,7 @@ describe('useTransactionStore', () => {
     expect(store.recentTransactions[1].id).toBe('tx-9')
   })
 
-  it('TC-09: adds a transaction optimistically and replaces the temporary ID', async () => {
+  it('UT-81: adds a transaction optimistically and replaces the temporary ID', async () => {
     vi.spyOn(Date, 'now').mockReturnValue(12345)
 
     await store.addTransaction({
@@ -187,7 +187,7 @@ describe('useTransactionStore', () => {
     )
   })
 
-  it('TC-10: uses defaults for optional transaction fields', async () => {
+  it('UT-82: uses defaults for optional transaction fields', async () => {
     vi.spyOn(Date.prototype, 'toISOString').mockReturnValue('2026-10-21T00:00:00.000Z')
     vi.spyOn(Date.prototype, 'toTimeString').mockReturnValue('09:15:00 GMT+0000')
 
@@ -209,7 +209,7 @@ describe('useTransactionStore', () => {
     )
   })
 
-  it('TC-11: does not add a transaction when signed out', async () => {
+  it('UT-83: does not add a transaction when signed out', async () => {
     mockAuth.currentUser = null
 
     await store.addTransaction({ type: 'expense', amount: 10 })
@@ -218,7 +218,7 @@ describe('useTransactionStore', () => {
     expect(mockAddDoc).not.toHaveBeenCalled()
   })
 
-  it('TC-12: updates a transaction optimistically and calls updateDoc', async () => {
+  it('UT-84: updates a transaction optimistically and calls updateDoc', async () => {
     store.transactions = [{ id: 'tx-1', type: 'expense', amount: 10 }]
 
     await store.updateTransaction('tx-1', { amount: 25, notes: 'Updated' })
@@ -231,7 +231,7 @@ describe('useTransactionStore', () => {
     )
   })
 
-  it('TC-13: does not update a transaction when signed out', async () => {
+  it('UT-85: does not update a transaction when signed out', async () => {
     mockAuth.currentUser = null
 
     await store.updateTransaction('tx-1', { amount: 25 })
@@ -239,7 +239,7 @@ describe('useTransactionStore', () => {
     expect(mockUpdateDoc).not.toHaveBeenCalled()
   })
 
-  it('TC-14: deletes a transaction optimistically and calls deleteDoc', async () => {
+  it('UT-86: deletes a transaction optimistically and calls deleteDoc', async () => {
     store.transactions = [{ id: 'keep' }, { id: 'remove' }]
 
     await store.deleteTransaction('remove')
@@ -250,7 +250,7 @@ describe('useTransactionStore', () => {
     })
   })
 
-  it('TC-15: does not delete a transaction when signed out', async () => {
+  it('UT-87: does not delete a transaction when signed out', async () => {
     mockAuth.currentUser = null
 
     await store.deleteTransaction('tx-1')
@@ -258,7 +258,7 @@ describe('useTransactionStore', () => {
     expect(mockDeleteDoc).not.toHaveBeenCalled()
   })
 
-  it('TC-16: searches transactions by category, notes, amount, and date', () => {
+  it('UT-88: searches transactions by category, notes, amount, and date', () => {
     store.transactions = [
       { id: '1', category: 'Groceries', notes: 'Weekly shop', amount: 150, date: '2026-10-21' },
       { id: '2', category: 'Transport', notes: 'Bus ticket', amount: 25, date: '2026-10-20' },
@@ -271,7 +271,7 @@ describe('useTransactionStore', () => {
     expect(store.searchTransactions('2026-10-20').map((tx) => tx.id)).toEqual(['2'])
   })
 
-  it('TC-17: fetches transactions and resolves after the first snapshot', async () => {
+  it('UT-89: fetches transactions and resolves after the first snapshot', async () => {
     const fetchPromise = store.fetchTransactions()
 
     expect(store.loading).toBe(true)
@@ -286,14 +286,14 @@ describe('useTransactionStore', () => {
     expect(store.loading).toBe(false)
   })
 
-  it('TC-18: resolves fetchTransactions without listening when signed out', async () => {
+  it('UT-90: resolves fetchTransactions without listening when signed out', async () => {
     mockAuth.currentUser = null
 
     await expect(store.fetchTransactions()).resolves.toBeUndefined()
     expect(mockOnSnapshot).not.toHaveBeenCalled()
   })
 
-  it('TC-19: resolves fetchTransactions and clears loading when the snapshot errors', async () => {
+  it('UT-89: resolves fetchTransactions and clears loading when the snapshot errors', async () => {
     const consoleError = vi.spyOn(console, 'error').mockImplementation(() => {})
     const error = new Error('fetch failed')
     const fetchPromise = store.fetchTransactions()
@@ -305,7 +305,7 @@ describe('useTransactionStore', () => {
     expect(store.loading).toBe(false)
   })
 
-  it('TC-20: stops listening and clears the unsubscribe callback', () => {
+  it('UT-91: stops listening and clears the unsubscribe callback', () => {
     store.listenTransactions()
 
     store.stopListening()

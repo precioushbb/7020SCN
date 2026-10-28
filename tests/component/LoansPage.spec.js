@@ -72,7 +72,7 @@ describe('LoansPage component logic tests', () => {
     if (wrapper) wrapper.unmount()
     vi.useRealTimers()
   })
-  it('starts and stops financial listeners', () => {
+  it('CT-14: starts and stops financial listeners', () => {
     expect(mockLoanStore.listenLoans).toHaveBeenCalled()
     expect(mockAccountStore.listenAccounts).toHaveBeenCalled()
     expect(mockTransactionStore.listenTransactions).toHaveBeenCalled()
@@ -81,13 +81,13 @@ describe('LoansPage component logic tests', () => {
     expect(mockAccountStore.stopListening).toHaveBeenCalled()
     expect(mockTransactionStore.stopListening).toHaveBeenCalled()
   })
-  it('opens a blank add-loan dialog', () => {
+  it('CT-15: opens a blank add-loan dialog', () => {
     wrapper.vm.addForm.personName = 'Old'
     wrapper.vm.openAddDialog()
     expect(wrapper.vm.addForm.personName).toBe('')
     expect(wrapper.vm.showAddDialog).toBe(true)
   })
-  it('does not create loans with missing name or nonpositive amount', async () => {
+  it('CT-16: does not create loans with missing name or nonpositive amount', async () => {
     wrapper.vm.addForm.personName = ''
     wrapper.vm.addForm.amount = 100
     await wrapper.vm.saveLoan()
@@ -96,7 +96,7 @@ describe('LoansPage component logic tests', () => {
     await wrapper.vm.saveLoan()
     expect(mockLoanStore.addLoan).not.toHaveBeenCalled()
   })
-  it('creates a valid loan', async () => {
+  it('CT-16: creates a valid loan', async () => {
     wrapper.vm.openAddDialog()
     wrapper.vm.addForm.personName = 'Sam'
     wrapper.vm.addForm.amount = 300
@@ -106,14 +106,14 @@ describe('LoansPage component logic tests', () => {
     )
     expect(wrapper.vm.showAddDialog).toBe(false)
   })
-  it('requires installments and account for installment loans', async () => {
+  it('CT-18: requires installments and account for installment loans', async () => {
     wrapper.vm.addForm.personName = 'Sam'
     wrapper.vm.addForm.amount = 300
     wrapper.vm.addForm.installmentCount = 0
     await wrapper.vm.saveLoanEntry()
     expect(mockLoanStore.addLoanWithInstallments).not.toHaveBeenCalled()
   })
-  it('creates a loan with installments', async () => {
+  it('CT-19: creates a loan with installments', async () => {
     Object.assign(wrapper.vm.addForm, {
       personName: 'Sam',
       amount: 300,
@@ -131,7 +131,7 @@ describe('LoansPage component logic tests', () => {
       }),
     )
   })
-  it('notifies on loan creation errors', async () => {
+  it('CT-20: notifies on loan creation errors', async () => {
     wrapper.vm.addForm.personName = 'Sam'
     wrapper.vm.addForm.amount = 300
     mockLoanStore.addLoan.mockRejectedValueOnce(new Error('offline'))

@@ -86,12 +86,12 @@ describe('Account Component Logic Tests', () => {
 
   // --- Lifecycle Tests ---
   describe('Lifecycle Hooks', () => {
-    it('should invoke listener endpoints on mount', () => {
+    it('CT-01: should invoke listener endpoints on mount', () => {
       expect(mockAccountStore.listenAccounts).toHaveBeenCalled()
       expect(mockTransactionStore.listenTransactions).toHaveBeenCalled()
     })
 
-    it('should unsubscribe from listener endpoints on unmount', () => {
+    it('CT-02: should unsubscribe from listener endpoints on unmount', () => {
       wrapper.unmount()
       expect(mockAccountStore.stopListening).toHaveBeenCalled()
       expect(mockTransactionStore.stopListening).toHaveBeenCalled()
@@ -100,14 +100,14 @@ describe('Account Component Logic Tests', () => {
 
   // --- Function: getTypeLabel ---
   describe('getTypeLabel()', () => {
-    it('should correctly map account types to translation keys', () => {
+    it('CT-03: should correctly map account types to translation keys', () => {
       const { getTypeLabel } = wrapper.vm
       expect(getTypeLabel('Cash')).toBe('accounts.cashAccount')
       expect(getTypeLabel('Bank')).toBe('accounts.bankAccount')
       expect(getTypeLabel('Mobile Banking')).toBe('accounts.mobileAccount')
     })
 
-    it('should return the original string if type is unmapped', () => {
+    it('CT-04:should return the original string if type is unmapped', () => {
       const { getTypeLabel } = wrapper.vm
       expect(getTypeLabel('UnknownType')).toBe('UnknownType')
     })
@@ -115,12 +115,12 @@ describe('Account Component Logic Tests', () => {
 
   // --- Function: getLastTx ---
   describe('getLastTx()', () => {
-    it('should return null if there are no transactions available', () => {
+    it('CT-05: should return null if there are no transactions available', () => {
       const { getLastTx } = wrapper.vm
       expect(getLastTx(1)).toBeNull()
     })
 
-    it('should return the most recent transaction matching the specified accountId context', () => {
+    it('CT-06: should return the most recent transaction matching the specified accountId context', () => {
       const { getLastTx } = wrapper.vm
       const mockTxs = [
         { id: 101, accountId: 1, amount: 50 },
@@ -135,7 +135,7 @@ describe('Account Component Logic Tests', () => {
 
   // --- Function: openAddDialog ---
   describe('openAddDialog()', () => {
-    it('should clear form fields and open the dialog context in create mode', () => {
+    it('CT-07: should clear form fields and open the dialog context in create mode', () => {
       const { openAddDialog, form } = wrapper.vm
 
       // Inject dummy dirty data first
@@ -154,7 +154,7 @@ describe('Account Component Logic Tests', () => {
 
   // --- Function: openEditDialog ---
   describe('openEditDialog()', () => {
-    it('should prepopulate the form with account metrics and open in editing mode', () => {
+    it('CT-08: should prepopulate the form with account metrics and open in editing mode', () => {
       const { openEditDialog, form } = wrapper.vm
       const accountMock = {
         id: 42,
@@ -178,7 +178,7 @@ describe('Account Component Logic Tests', () => {
 
   // --- Function: saveAccount ---
   describe('saveAccount()', () => {
-    it('should halt execution if form validation fields (name) are omitted', async () => {
+    it('CT-09: should halt execution if form validation fields (name) are omitted', async () => {
       const { saveAccount, form } = wrapper.vm
       form.name = '' // invalid state
 
@@ -187,7 +187,7 @@ describe('Account Component Logic Tests', () => {
       expect(mockAccountStore.addAccount).not.toHaveBeenCalled()
     })
 
-    it('should invoke store addAccount and notify user when creating a new record', async () => {
+    it('CT-10: should invoke store addAccount and notify user when creating a new record', async () => {
       const { saveAccount, form } = wrapper.vm
       wrapper.vm.isEditing = false
       form.name = 'New Pocket'
@@ -210,7 +210,7 @@ describe('Account Component Logic Tests', () => {
       expect(wrapper.vm.showDialog).toBe(false)
     })
 
-    it('should invoke store updateAccount when updating an existing account context', async () => {
+    it('CT-11: should invoke store updateAccount when updating an existing account context', async () => {
       const { saveAccount, form } = wrapper.vm
       wrapper.vm.isEditing = true
       wrapper.vm.editingId = 12
@@ -226,7 +226,7 @@ describe('Account Component Logic Tests', () => {
       })
     })
 
-    it('should catch exceptions cleanly and push an error banner to user feedback', async () => {
+    it('CT-12: should catch exceptions cleanly and push an error banner to user feedback', async () => {
       const { saveAccount, form } = wrapper.vm
       form.name = 'Faulty Record'
       mockAccountStore.addAccount.mockRejectedValueOnce(new Error('DB Network Down'))
@@ -242,27 +242,9 @@ describe('Account Component Logic Tests', () => {
     })
   })
 
-  // --- Function: confirmDelete ---
-  // describe('confirmDelete()', () => {
-  //   it('should summon the confirmation modal and call store deletion routines upon approval', () => {
-  //     const { confirmDelete } = wrapper.vm
-  //     const sampleAccount = { id: 5, name: 'Disposable Account' }
-
-  //     confirmDelete(sampleAccount)
-
-  //     expect(mockDialog).toHaveBeenCalled()
-  //     expect(mockAccountStore.deleteAccount).toHaveBeenCalledWith(5)
-  //     expect(mockNotify).toHaveBeenCalledWith({
-  //       type: 'positive',
-  //       message: 'accounts.accountDeleted',
-  //       position: 'top',
-  //     })
-  //   })
-  // })
-
   // --- Function: onSwipe ---
   describe('onSwipe()', () => {
-    it('should call wrapper reset immediately and fire conditional events following timers', () => {
+    it('CT-13: should call wrapper reset immediately and fire conditional events following timers', () => {
       const { onSwipe } = wrapper.vm
       const mockReset = vi.fn()
       const dummyAccount = { id: 7, name: 'Swipe Account' }
